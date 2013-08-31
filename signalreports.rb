@@ -125,12 +125,13 @@ post "/api/input" do
 	}
 
 	entry = nil
-	if entry_id
-		entry = Entry[entry_id] or raise EntryNotFoundError
-		entry.update(data)
-	else
+
+	if entry_id.empty?
 		entry_id = Entry.insert(data)
 		entry = Entry[entry_id]
+	else
+		entry = Entry[entry_id] or raise EntryNotFoundError
+		entry.update(data)
 	end
 
 	content_type :json

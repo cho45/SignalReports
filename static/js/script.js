@@ -35,10 +35,10 @@ SignalReports = {
 	tz : (new Date().getTimezoneOffset()),
 
 	setDateAndTime : function (entry) {
-		var dt = new Date(entry.datetime);
+		var dt = new Date(entry.datetime * 1000);
 
-		entry.date = dt;
-		entry.tiem = dt;
+		entry.date = dt.strftime('%Y-%m-%d');
+		entry.time = dt.strftime('%H:%M');
 	},
 	
 	init : function () {
@@ -78,13 +78,17 @@ SignalReports = {
 
 		self.inputForm.find('form').submit(function () {
 			var $this = $(this);
+			var data = $this.serializeArray();
+			data.push({ name : 'tz', value: (new Date()).getTimezoneOffset()  });
 			$.ajax({
 				url: "/api/input",
 				type : "POST",
-				data : $this.serialize(),
+				data : data,
 				dataType: 'json'
 			}).
 			done(function (data) {
+				localStorage.inputBackup = '';
+
 				self.inputForm.data('changed', false);
 				self.inputForm.find('form')[0].reset();
 				self.inputForm.modal('hide');
@@ -93,7 +97,7 @@ SignalReports = {
 				row.data('data', data.entry);
 
 				var exists = self.entriesContainer.find('[data-id=' + data.entry.id + ']');
-				if (exists) {
+				if (exists.length) {
 					exists.replaceWith(row);
 				} else {
 					row.prependTo(self.entriesContainer);
@@ -211,6 +215,7 @@ SignalReports = {
 
 		var tiemr;
 		if (data) {
+			SignalReports.setDateAndTime(data);
 			self.inputFormForm.deserialize(data);
 		} else {
 			self.inputFormForm.deserialize({});
@@ -232,6 +237,7 @@ SignalReports = {
 				self.inputForm.find('input[name=frequency]').focus();
 			}).
 			on('hide.bs.modal', function () {
+				clearInterval(timer);
 				if (self.inputForm.data('changed')) {
 					return confirm('Sure?');
 				}

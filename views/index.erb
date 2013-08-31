@@ -17,6 +17,7 @@
 		<script type="text/javascript" src="/js/typeahead.min.js"></script>
 		<script type="text/javascript" src="/js/jquery.ba-hashchange.min.js"></script>
 		<script type="text/javascript" src="/js/jquery.deserialize.js"></script>
+		<script type="text/javascript" src="/js/strftime.js"></script>
 
 		<script type="text/javascript" src="/js/script.js"></script>
 	</head>
@@ -60,7 +61,7 @@
 							<td>[%= callsign %]</td>
 							<td>[%= frequency %]</td>
 							<td>[%= mode %]</td>
-							<td>[%= datetime %]</td>
+							<td><time data-epoch="[%= datetime * 1000 %]">[%= new Date(datetime * 1000).strftime('%Y-%m-%d %H:%M') %]</time></td>
 							<td>[%= ur_rst %]</td>
 							<td>[%= my_rst %]</td>
 							<td>[%= name %]</td>
@@ -212,8 +213,7 @@
 								</div>
 							</div>
 							<div class="modal-footer">
-								<input type="hidden" name="tz" value="[%= (new Date()).getTimezoneOffset() %]"/>
-								<input type="hidden" name="id" value="[%= id %]"/>
+								<input type="hidden" name="id" value=""/>
 								<input type="submit" class="btn btn-primary" value="Save changes"/>
 							</div>
 						</form>
