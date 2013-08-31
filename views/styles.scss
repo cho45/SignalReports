@@ -1,0 +1,54 @@
+.tt-hint {
+	display: none;
+}
+
+body {
+	padding-top: 50px;
+}
+
+body.modal-open, .modal-open .navbar-fixed-top, .modal-open .navbar-fixed-bottom {
+	margin: 0 !important;
+}
+
+#input-form {
+	.rst-container .tone {
+		display: none;
+	}
+
+	&.mode-CW .rst-container .tone {
+		display: table-row;
+	}
+
+	.row {
+		margin: 15px 0;
+	}
+
+	input[name=frequency] { 
+		text-align: right;
+	}
+
+	.rst-container {
+		.rst-dropdown {
+			font-size: 12px;
+			display: none;
+			position: absolute;
+			top: 100%;
+			left: 0;
+			z-index: 100;
+			width: 500px;
+			padding: 10px;
+			background-color: #fff;
+
+			table {
+				tr {
+					th {
+						width: 100px;
+						padding: 5px;
+					}
+				}
+			}
+		}
+	}
+}
+
+
