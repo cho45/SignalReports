@@ -11,46 +11,81 @@ require "rack/test"
 
 describe "SignalReports API" do
 	include Rack::Test::Methods
+	def app; SignalReports; end
 
-	def app
-		Sinatra::Application
+	before do
+		SignalReports::DB.run "DELETE FROM entries"
 	end
 
-	it "returns entries" do
-		get "/api/entries"
-		expect(last_response).to be_ok
+	describe "/api/entries" do
+		it "returns entries" do
+			get "/api/entries"
+			expect(last_response).to be_ok
+		end
 	end
 
-	it "can treat datetime strictly" do
-		post "/api/input", {
-			"callsign" => "JXXXXXX",
-			"frequency"=> "7.101",
-			"mode"     => "CW",
-			"date"     => "2013-09-01",
-			"time"     => "12:00",
-			"tz"       => "-540", ## value from new Date().getTimezoneOffset()
-			"ur_rst"   => "599",
-			"my_rst"   => "599",
-			"name"     => "Foo Bar",
-			"address"  => "Kyoto",
-			"memo"     => "Memome",
-		}
-
-		data = JSON.parse(last_response.body)
-		expect(data).to eq({
-			"ok" => true,
-			"entry" => {
-				"id"        => 1,
-				"callsign"  => "JXXXXXX",
-				"frequency" => 7.101,
-				"mode"      => "CW",
-				"datetime"  => 1378004400,
-				"ur_rst"    => "599",
-				"my_rst"    => "599",
-				"name"      => "Foo Bar",
-				"address"   => "Kyoto",
-				"memo"      => "Memome"
+	describe "/api/input" do
+		it "can treat datetime strictly" do
+			post "/api/input", {
+				"callsign" => "JXXXXXX",
+				"frequency"=> "7.101",
+				"mode"     => "CW",
+				"date"     => "2013-09-01",
+				"time"     => "12:00",
+				"tz"       => "-540", ## value from new Date().getTimezoneOffset()
+				"ur_rst"   => "599",
+				"my_rst"   => "599",
+				"name"     => "Foo Bar",
+				"address"  => "Kyoto",
+				"memo"     => "Memome",
 			}
-		})
+
+			data = JSON.parse(last_response.body)
+			expect(data).to eq({
+				"ok" => true,
+				"entry" => {
+					"id"        => 1,
+					"callsign"  => "JXXXXXX",
+					"frequency" => 7.101,
+					"mode"      => "CW",
+					"datetime"  => 1378004400,
+					"ur_rst"    => "599",
+					"my_rst"    => "599",
+					"name"      => "Foo Bar",
+					"address"   => "Kyoto",
+					"memo"      => "Memome"
+				}
+			})
+
+			entry = SignalReports::Entry[data["entry"]["id"]]
+			expect(entry).to be_a_kind_of(SignalReports::Entry)
+		end
+	end
+
+	describe "/api/callsign" do
+		context "with no matched entries" do
+			it "returns fallback area information (ja area)" do
+				get "/api/callsign?q=JA1XXX"
+				data = JSON.parse(last_response.body)
+				expect(data).to eq([
+					{
+						"country"   => "Japan",
+						"area"      => "Tokyo, Kanagawa, Chiba, Saitama, Gumma, Tochigi, Ibaraki, Yamanashi",
+						"value"     => "JA1XXX"
+					}
+				])
+			end
+			it "returns fallback area information (generic other countries)" do
+				get "/api/callsign?q=K0XXX"
+				data = JSON.parse(last_response.body)
+				expect(data).to eq([
+					{
+						"country"   => "United States",
+						"area"      => "",
+						"value"     => "K0XXX"
+					}
+				])
+			end
+		end
 	end
 end

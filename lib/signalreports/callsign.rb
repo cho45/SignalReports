@@ -1,4 +1,4 @@
-module SignalReports
+class SignalReports
 	CALLSIGN_INFO = [
 		[/^A[A-L]/, 'United States', ''],
 		[/^A[M-O]/, 'Spain', ''],

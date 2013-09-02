@@ -146,7 +146,7 @@ SignalReports = {
 						};
 					}
 				},
-				remote : '/callsign?q=%QUERY'
+				remote : '/api/callsign?q=%QUERY'
 			}).
 			blur(function () {
 				var $this = $(this);
