@@ -36,7 +36,7 @@
 			<div class="collapse navbar-collapse">
 				<ul class="nav navbar-nav">
 					<li class="active"><a href="#">List</a></li>
-					<li><a href="#about">Find</a></li>
+					<li><a href="#find">Find</a></li>
 					<li><a href="#new">New report</a></li>
 				</ul>
 			</div><!--/.nav-collapse -->
@@ -74,7 +74,7 @@
 				</tbody>
 			</table>
 
-			<div class="modal fade" id="input-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+			<div class="modal" id="input-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
 				<div class="modal-dialog" style="width: 1000px">
 					<div class="modal-content">
 						<form class="form-inline" role="form">
@@ -130,6 +130,17 @@
 												Call sign
 											</span>
 											<input type="text" size="10" name="callsign" class="form-control input-sm" required/>
+											<script type="application/x-template" id="callcompl">
+												<p style="width: 400px">
+												[% if (this.stash.count) { %]
+												<strong>[%= value %]</strong> ([%= count %])<br/>
+												[%= name %] [%= address %] ([%= country %])
+												[% } else { %]
+												<strong>[%= country %]</strong><br/>
+												[%= area %]
+												[% } %]
+												</p>
+											</script>
 										</div>
 									</div>
 									<div class="col-lg-2">

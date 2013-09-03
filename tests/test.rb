@@ -9,6 +9,20 @@ require "signalreports"
 require "rspec"
 require "rack/test"
 
+def create_entry(data={})
+	SignalReports::Entry.insert({
+		:callsign  => Array.new(5).map {|i| ("A".."Z").to_a.sample }.join,
+		:frequency => '7.0010',
+		:mode      => 'CW',
+		:datetime  => Time.now.to_i,
+		:ur_rst    => '599',
+		:my_rst    => '599',
+		:name      => 'FOO',
+		:address   => 'Kyoto, Japan',
+		:memo      => '',
+	}.merge(data))
+end
+
 describe "SignalReports API" do
 	include Rack::Test::Methods
 	def app; SignalReports; end
@@ -83,6 +97,34 @@ describe "SignalReports API" do
 						"country"   => "United States",
 						"area"      => "",
 						"value"     => "K0XXX"
+					}
+				])
+			end
+		end
+
+		context "with already communicated station" do
+			before do
+				create_entry(:callsign => 'JA1XXX', :name => 'TARO', :address => 'Kyoto, Japan')
+				create_entry(:callsign => 'JA1XXX', :name => 'TARO', :address => 'Kyoto, Japan')
+				create_entry(:callsign => 'JA1XXX', :name => 'TARO', :address => 'Kyoto, Japan')
+			end
+
+			it "returns existing information" do
+				get "/api/callsign?q=JA1"
+				data = JSON.parse(last_response.body)
+				expect(data).to eq([
+					{
+						"country"   => "Japan",
+						"area"      => "Tokyo, Kanagawa, Chiba, Saitama, Gumma, Tochigi, Ibaraki, Yamanashi",
+						"name"      => "TARO",
+						"address"   => "Kyoto, Japan",
+						"count"     => 3,
+						"value"     => "JA1XXX"
+					},
+					{
+						"country"   => "Japan",
+						"area"      => "Tokyo, Kanagawa, Chiba, Saitama, Gumma, Tochigi, Ibaraki, Yamanashi",
+						"value"     => "JA1"
 					}
 				])
 			end

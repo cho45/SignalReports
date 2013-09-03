@@ -8,6 +8,7 @@ body {
 
 body.modal-open, .modal-open .navbar-fixed-top, .modal-open .navbar-fixed-bottom {
 	margin: 0 !important;
+	overflow: visible !important;
 }
 
 #input-form {

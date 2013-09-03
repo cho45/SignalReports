@@ -108,6 +108,17 @@ SignalReports = {
 			return false;
 		});
 
+//		self.inputForm.find('input').keydown(function (e) {
+//			if (e.keyCode === 13) {
+//				var inputs = $(this).closest("form").find("input, button").filter(":visible");
+//				var next = inputs.eq(inputs.index(this) + 1);
+//				if (next.length) {
+//					next.focus();
+//					return false;
+//				}
+//			}
+//		});
+
 		self.inputForm.find('input, textarea').change(function () {
 			self.inputForm.data('changed', true);
 		});
@@ -138,7 +149,7 @@ SignalReports = {
 		self.inputForm.find('input[name=callsign]').
 			typeahead({
 				name : 'callsign',
-				template: '<p style="width: 400px"><strong>[%= country %]</strong><br/>[%= area %]</p>',
+				template: 'callcompl',
 				engine: {
 					compile : function (string) {
 						return {
@@ -151,6 +162,19 @@ SignalReports = {
 			blur(function () {
 				var $this = $(this);
 				$this.val($this.val().toUpperCase());
+
+				$.ajax({
+					url: "/api/callsign",
+					type : "GET",
+					data : { q : $this.val() },
+					dataType: 'json'
+				}).
+				done(function (data) {
+					self.inputForm.find('input[name=name]').val(data[0].name);
+					self.inputForm.find('input[name=address]').val(data[0].address || data[0].country);
+				}).
+				fail(function (e) {
+				});
 			});
 
 		self.inputForm.find('input[name=ur_rst], input[name=my_rst]').

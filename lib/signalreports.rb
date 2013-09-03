@@ -41,26 +41,6 @@ class SignalReports < Sinatra::Base
 		erb :index
 	end
 
-	get "/api/callsign" do
-		## TODO: 過去に交信したことあるリストから探し、存在しなければフォールバックするように
-		callsign = request['q'].upcase
-
-		matched = SignalReports::CALLSIGN_INFO.find {|(re,_,_)| re.match(callsign) }
-
-		content_type :json
-		if matched
-			[
-				{
-					"country" => matched[1],
-					"area"    => matched[2],
-					"value"   => callsign
-				}
-			].to_json
-		else
-			[].to_json
-		end
-	end
-
 	get "/styles.css" do
 		scss :styles
 	end
@@ -114,6 +94,33 @@ class SignalReports < Sinatra::Base
 				i.to_stash
 			}
 		}.to_json
+	end
+
+	get "/api/callsign" do
+		## TODO: 過去に交信したことあるリストから探し、存在しなければフォールバックするように
+		callsign = request['q'].upcase
+		data = []
+
+		matched = SignalReports::CALLSIGN_INFO.find {|(re,_,_)| re.match(callsign) }
+		data << {
+			"country" => matched[1],
+			"area"    => matched[2],
+			"value"   => callsign
+		} if matched
+
+		DB["SELECT *, COUNT(*) as count FROM entries WHERE callsign LIKE ? GROUP BY callsign ORDER BY datetime DESC LIMIT 10", "#{callsign}%"].each do |entry|
+			data.push({
+				"country" => matched ? matched[1] : "",
+				"area"    => matched ? matched[2] : "",
+				"name"    => entry[:name],
+				"address" => entry[:address],
+				"count"   => entry[:count],
+				"value"   => entry[:callsign],
+			})
+		end
+
+		content_type :json
+		data.reverse.to_json
 	end
 
 
