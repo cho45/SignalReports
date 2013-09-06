@@ -4,28 +4,11 @@ require "sass"
 require "json"
 require "pathname"
 
+require "signalreports/config"
+require "signalreports/db"
+require "signalreports/callsign"
+
 class SignalReports < Sinatra::Base
-	set :static, true
-	set :root, Pathname(__FILE__).parent.parent
-	set :public_folder, 'static'
-
-	configure :production do
-		set :db, "sqlite://#{settings.root + 'data.db'}"
-	end
-
-	configure :development do
-		set :db, "sqlite://#{settings.root + 'debug.db'}"
-	end
-
-	configure :test do
-		test_db = "sqlite://#{Dir.tmpdir}/#{$$}-#{(0...5).map{ ('a'..'z').to_a[rand(26)] }.join}.db"
-		warn "Using DB: #{test_db}"
-		set :db, test_db
-	end
-
-	require "signalreports/callsign"
-	require "signalreports/db"
-
 	class APIError < Exception; end
 	class EntryNotFoundError < APIError; end
 
@@ -45,7 +28,7 @@ class SignalReports < Sinatra::Base
 		scss :styles
 	end
 
-	post "/api/input" do
+	post "/api/entries" do
 		entry_id = request["id"]
 
 		date = /^(?<year>\d{4})-(?<month>\d\d)-(?<day>\d\d)$/.match(request["date"])
@@ -68,8 +51,7 @@ class SignalReports < Sinatra::Base
 		entry = nil
 
 		if !entry_id || entry_id.empty?
-			entry_id = Entry.insert(data)
-			entry = Entry[entry_id]
+			entry = Entry.create(data)
 		else
 			entry = Entry[entry_id] or raise EntryNotFoundError
 			entry.update(data)
@@ -96,8 +78,25 @@ class SignalReports < Sinatra::Base
 		}.to_json
 	end
 
+	delete "/api/entries" do
+		entry = Entry.where('id = ?', request["id"].to_i).first
+
+		content_type :json
+		if entry
+			entry.delete
+			{
+				"ok" => true,
+				"entry" => entry.to_stash
+			}.to_json
+		else
+			{
+				"ok" => false,
+				"entry" => nil,
+			}.to_json
+		end
+	end
+
 	get "/api/callsign" do
-		## TODO: 過去に交信したことあるリストから探し、存在しなければフォールバックするように
 		callsign = request['q'].upcase
 		data = []
 

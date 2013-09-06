@@ -67,6 +67,8 @@ SignalReports = {
 				row.data('data', it);
 				row.appendTo(self.entriesContainer);
 			}
+
+			$(window).hashchange();
 		}).
 		fail(function (e) {
 		});
@@ -76,12 +78,23 @@ SignalReports = {
 	bindEvents : function () {
 		var self = this;
 
+		self.inputForm.
+			on('shown.bs.modal', function () {
+				self.inputForm.find('input[name=frequency]').focus();
+			}).
+			on('hide.bs.modal', function () {
+				clearInterval(timer);
+				if (self.inputForm.data('changed')) {
+					return confirm('Sure?');
+				}
+			});
+
 		self.inputForm.find('form').submit(function () {
 			var $this = $(this);
 			var data = $this.serializeArray();
 			data.push({ name : 'tz', value: (new Date()).getTimezoneOffset()  });
 			$.ajax({
-				url: "/api/input",
+				url: "/api/entries",
 				type : "POST",
 				data : data,
 				dataType: 'json'
@@ -107,17 +120,6 @@ SignalReports = {
 			});
 			return false;
 		});
-
-//		self.inputForm.find('input').keydown(function (e) {
-//			if (e.keyCode === 13) {
-//				var inputs = $(this).closest("form").find("input, button").filter(":visible");
-//				var next = inputs.eq(inputs.index(this) + 1);
-//				if (next.length) {
-//					next.focus();
-//					return false;
-//				}
-//			}
-//		});
 
 		self.inputForm.find('input, textarea').change(function () {
 			self.inputForm.data('changed', true);
@@ -170,11 +172,29 @@ SignalReports = {
 					dataType: 'json'
 				}).
 				done(function (data) {
-					self.inputForm.find('input[name=name]').val(data[0].name);
-					self.inputForm.find('input[name=address]').val(data[0].address || data[0].country);
+					if (data.length) {
+						self.inputForm.find('input[name=name]').val(data[0].name);
+						self.inputForm.find('input[name=address]').val(data[0].address || data[0].country);
+					}
 				}).
 				fail(function (e) {
 				});
+			}).
+			keydown(function (e) {
+				console.log('call');
+				var $this = $(this);
+				var key = keyString(e);
+				if (key === 'RET') {
+					$this.data('ttView').inputView.trigger('enterKeyed', e);
+				} else
+				if (key === 'C-n') {
+					e.ctrlKey = false;
+					$this.data('ttView').inputView.trigger('downKeyed', e);
+				} else
+				if (key === 'C-p') {
+					e.ctrlKey = false;
+					$this.data('ttView').inputView.trigger('upKeyed', e);
+				}
 			});
 
 		self.inputForm.find('input[name=ur_rst], input[name=my_rst]').
@@ -215,16 +235,30 @@ SignalReports = {
 			if (location.hash === '#new') {
 				self.openForm();
 			}
-		}).hashchange();
+		});
 
 		self.inputForm.on('hidden.bs.modal', function () {
 			location.hash = '';
 		});
 
-		$('#entries').on('click', 'tr', function () {
+		self.entriesContainer.on('click', 'tr', function () {
 			var data = $(this).data('data');
 			self.openForm(data);
 		});
+
+		self.inputForm.find('input').keydown(function (e) {
+			var key = keyString(e);
+			var current = $(this);
+			if (key === 'RET') {
+				var inputs  = current.closest("form").find("input, button").filter(":visible");
+				var next = inputs.eq(inputs.index(this) + 1);
+				if (next.length) {
+					next.focus();
+					return false;
+				}
+			}
+		});
+
 
 //		$(window).on('beforeunload', function () {
 //			return 'Sure to unload?';
@@ -235,37 +269,34 @@ SignalReports = {
 	openForm : function (data) {
 		var self = this;
 
-		console.log(['openForm', data]);
-
 		var tiemr;
 		if (data) {
 			SignalReports.setDateAndTime(data);
 			self.inputFormForm.deserialize(data);
 		} else {
-			self.inputFormForm.deserialize({});
+			var last = self.entriesContainer.find('tr:first').data('data');
+			if (last) {
+				self.inputFormForm.deserialize({
+					frequency : last.frequency,
+					mode : last.mode
+				});
+			}
 
 			if (localStorage.inputBackup) {
 				self.inputFormForm.deserialize(localStorage.inputBackup);
 			}
 
 			timer = setInterval(function () {
-				localStorage.inputBackup = self.inputFormForm.serialize();
+				if (self.inputForm.data('changed')) {
+					localStorage.inputBackup = self.inputFormForm.serialize();
+				}
 			}, 1000);
 		}
 
 		self.inputForm.data('changed', false);
 		self.inputForm.modal({
 			keyboard: false
-		}).
-			on('shown.bs.modal', function () {
-				self.inputForm.find('input[name=frequency]').focus();
-			}).
-			on('hide.bs.modal', function () {
-				clearInterval(timer);
-				if (self.inputForm.data('changed')) {
-					return confirm('Sure?');
-				}
-			});
+		});
 	}
 };
 

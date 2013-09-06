@@ -31,16 +31,16 @@ describe "SignalReports API" do
 		SignalReports::DB.run "DELETE FROM entries"
 	end
 
-	describe "/api/entries" do
+	describe "GET /api/entries" do
 		it "returns entries" do
 			get "/api/entries"
 			expect(last_response).to be_ok
 		end
 	end
 
-	describe "/api/input" do
+	describe "POST /api/entries" do
 		it "can treat datetime strictly" do
-			post "/api/input", {
+			post "/api/entries", {
 				"callsign" => "JXXXXXX",
 				"frequency"=> "7.101",
 				"mode"     => "CW",
@@ -127,6 +127,34 @@ describe "SignalReports API" do
 						"value"     => "JA1"
 					}
 				])
+			end
+		end
+	end
+
+	describe "/api/delete" do
+		context "with existing entry" do
+			it "can delete entry with id" do
+				entry = SignalReports::Entry[create_entry()]
+
+				delete "/api/entries", { "id" => entry.id }
+				data = JSON.parse(last_response.body)
+				expect(data).to eq({
+					"ok" => true,
+					"entry" => entry.to_stash
+				})
+
+				expect(SignalReports::Entry[entry.id]).to be_nil
+			end
+		end
+
+		context "with no entry" do
+			it "returns error" do
+				delete "/api/entries", { "id" => 0 }
+				data = JSON.parse(last_response.body)
+				expect(data).to eq({
+					"ok" => false,
+					"entry" => nil
+				})
 			end
 		end
 	end
