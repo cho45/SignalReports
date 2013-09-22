@@ -65,7 +65,7 @@ class SignalReports < Sinatra::Base
 		data = Entry
 
 		if request["query"]
-			data = data.where(Sequel.join([:callsign, :frequency, :mode, :datetime, :name, :address, :memo]).like("%#{request["query"]}%", :case_insensitive => true))
+			data = data.where(Sequel.join([:callsign, :frequency, :mode, :name, :address, :memo]).like("%#{request["query"]}%", :case_insensitive => true))
 		end
 
 		if request["before"]

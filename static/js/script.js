@@ -299,8 +299,27 @@ SignalReports = {
 						}
 						$this.data('prev', $this.val());
 					}
-				}, 1000));
+				}, 500));
 			});
+
+		$('#delete').click(function () {
+			if (confirm('Sure to delete this entry?')) {
+				var id = self.inputForm.find('[name=id]').val();
+				$.ajax({
+					url: "/api/entries",
+					type : "DELETE",
+					data : { id : id },
+					dataType: 'json',
+				}).
+				done(function (data) {
+					self.inputForm.modal('hide');
+					location.hash = '#home';
+				}).
+				fail(function (e) {
+					alert(e);
+				});
+			}
+		});
 	},
 
 	openForm : function (data) {
@@ -308,11 +327,13 @@ SignalReports = {
 
 		if (data) {
 			self.inputForm.find('.edit-type').text('Edit (id=' + data.id + ')');
+			self.inputForm.find('#delete').show();
 
 			SignalReports.setDateAndTime(data);
 			self.inputFormForm.deserialize(data);
 		} else {
 			self.inputForm.find('.edit-type').text('New');
+			self.inputForm.find('#delete').hide();
 
 			var last = self.entriesContainer.find('tr:first').data('data');
 			if (last) {
