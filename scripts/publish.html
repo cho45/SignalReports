@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>JH1UMV's communication log in [% year %]</title>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+		<!-- link rel="stylesheet" type="text/css" href="../signalreports.css" media="screen,tv"/-->
+
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+		<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+
+		<style>
+			.container {
+				max-width: 800px;
+			}
+
+			section h1 {
+				font-size: 100%;
+			}
+
+			.report {
+				margin: 10px;
+				padding: 10px;
+				background: #efefef;
+			}
+
+			.report .callsign {
+				font-weight: bold;
+			}
+
+			.footer {
+				color: #666;
+				border-top: 1px solid #eee;
+				margin: 40px 0 0 0;
+				padding: 10px 0;
+			}
+		</style>
+		<!--[if lt IE 9]>
+		<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+		<![endif]-->
+	</head>
+	<body>
+		<div class="container">
+			<div class="page-header">
+				<h1>JH1UMV's communication log in [% year %]</h1>
+			</div>
+
+			[% FOR date IN data %]
+			<section class="row">
+				<h1 class="col-md-12">[% date.date %]</h1>
+				[% FOR row IN date.rows %]
+				<div class="report col-md-3">
+					<span class="callsign">[% row.callsign %]</span>
+					<span class="frequency">[% row.frequency %]MHz</span>
+					<span class="mode">[% row.mode %]</span>
+				</div>
+				[% END %]
+			</section>
+			[% END %]
+
+			<div class="footer">
+				<p>Ham Radio Operator. cho45, JH1UMV <a href="http://www.lowreal.net/">www.lowreal.net</a></p>
+			</div>
+		</div>
+	</body>
+</html>
