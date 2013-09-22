@@ -62,12 +62,18 @@ class SignalReports < Sinatra::Base
 	end
 
 	get "/api/entries" do
-		if request["before"].nil?
-			entries = Entry.order(Sequel.desc(:datetime)).limit(100).all
-		else
-			before = request["before"].to_i
-			entries = Entry.where('id < ?', before).order(Sequel.desc(:datetime)).limit(100).all
+		data = Entry
+
+		if request["query"]
+			data = data.where(Sequel.join([:callsign, :frequency, :mode, :datetime, :name, :address, :memo]).like("%#{request["query"]}%", :case_insensitive => true))
 		end
+
+		if request["before"]
+			before = request["before"].to_i
+			data = data.where('id < ?', before)
+		end
+
+		entries = data.order(Sequel.desc(:datetime)).limit(100).all
 
 		content_type :json
 		{

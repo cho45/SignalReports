@@ -52,13 +52,13 @@ SignalReports = {
 		self.loadEntries();
 	},
 
-	loadEntries : function (n) {
+	loadEntries : function (opts) {
 		var self = this;
 
 		$.ajax({
 			url: "/api/entries",
 			type : "GET",
-			data : {},
+			data : opts,
 			dataType: 'json'
 		}).
 		done(function (data) {
@@ -67,8 +67,6 @@ SignalReports = {
 				row.data('data', it);
 				row.appendTo(self.entriesContainer);
 			}
-
-			$(window).hashchange();
 		}).
 		fail(function (e) {
 		});
@@ -83,7 +81,7 @@ SignalReports = {
 				self.inputForm.find('input[name=frequency]').focus();
 			}).
 			on('hide.bs.modal', function () {
-				clearInterval(timer);
+				clearInterval(self.inputForm.data('timer'));
 				if (self.inputForm.data('changed')) {
 					return confirm('Sure?');
 				}
@@ -172,7 +170,7 @@ SignalReports = {
 					dataType: 'json'
 				}).
 				done(function (data) {
-					if (data.length) {
+					if (data.length && data[0].value === $this.val()) {
 						self.inputForm.find('input[name=name]').val(data[0].name);
 						self.inputForm.find('input[name=address]').val(data[0].address || data[0].country);
 					}
@@ -181,7 +179,6 @@ SignalReports = {
 				});
 			}).
 			keydown(function (e) {
-				console.log('call');
 				var $this = $(this);
 				var key = keyString(e);
 				if (key === 'RET') {
@@ -234,6 +231,16 @@ SignalReports = {
 		$(window).on('hashchange', function () {
 			if (location.hash === '#new') {
 				self.openForm();
+			} else
+			if (location.hash === '#home') {
+				self.entriesContainer.empty();
+				self.loadEntries({});
+				location.hash = '#';
+			} else
+			if (location.hash.match(/^#find:(.+)/)) {
+				var query = RegExp.$1;
+				self.entriesContainer.empty();
+				self.loadEntries({ query : query });
 			}
 		});
 
@@ -264,16 +271,49 @@ SignalReports = {
 //			return 'Sure to unload?';
 //		});
 //
+
+		$('#search-form').submit(function () {
+			var $this = $('#search');
+			if ($this.val()) {
+				location.hash = '#find:' + $this.val();
+			} else {
+				location.hash = '#home';
+			}
+			$this.data('prev', $this.val());
+			return false;
+		});
+
+		$('#search').
+			keyup(function () {
+				var $this = $(this);
+				var timer  = $this.data('timer');
+
+				clearTimeout(timer);
+				$this.data('timer', setTimeout(function () {
+					console.log('timer', [$this.data('prev'), $this.val()]);
+					if ($this.data('prev') !== $this.val()) {
+						if ($this.val()) {
+							location.hash = '#find:' + $this.val();
+						} else {
+							location.hash = '#home';
+						}
+						$this.data('prev', $this.val());
+					}
+				}, 1000));
+			});
 	},
 
 	openForm : function (data) {
 		var self = this;
 
-		var tiemr;
 		if (data) {
+			self.inputForm.find('.edit-type').text('Edit (id=' + data.id + ')');
+
 			SignalReports.setDateAndTime(data);
 			self.inputFormForm.deserialize(data);
 		} else {
+			self.inputForm.find('.edit-type').text('New');
+
 			var last = self.entriesContainer.find('tr:first').data('data');
 			if (last) {
 				self.inputFormForm.deserialize({
@@ -286,11 +326,11 @@ SignalReports = {
 				self.inputFormForm.deserialize(localStorage.inputBackup);
 			}
 
-			timer = setInterval(function () {
+			self.inputForm.data('timer', setInterval(function () {
 				if (self.inputForm.data('changed')) {
 					localStorage.inputBackup = self.inputFormForm.serialize();
 				}
-			}, 1000);
+			}, 1000));
 		}
 
 		self.inputForm.data('changed', false);

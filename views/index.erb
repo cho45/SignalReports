@@ -37,9 +37,13 @@
 			<div class="collapse navbar-collapse">
 				<ul class="nav navbar-nav">
 					<li class="active"><a href="#">List</a></li>
-					<li><a href="#find">Find</a></li>
 					<li><a href="#new">New report</a></li>
 				</ul>
+				<form class="navbar-form navbar-right" id="search-form">
+					<div class="form-group">
+						<input type="search" placeholder="Search" class="form-control" id="search">
+					</div>
+				</form>
 			</div><!--/.nav-collapse -->
 		</div>
 
@@ -81,7 +85,7 @@
 						<form class="form-inline" role="form">
 							<div class="modal-header">
 								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-								<h4 class="modal-title"><span class="glyphicon glyphicon-headphones"></span> Signal Report</h4>
+								<h4 class="modal-title"><span class="glyphicon glyphicon-headphones"></span> Signal Report: <span class="edit-type">AA</span></h4>
 							</div>
 							<div class="modal-body">
 								<div class="row">

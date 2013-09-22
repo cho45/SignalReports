@@ -1,1 +1,1 @@
-app: rackup -p 9876 -E production
+app: bundle exec rackup -p 9876
