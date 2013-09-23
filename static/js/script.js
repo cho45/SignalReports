@@ -49,11 +49,14 @@ SignalReports = {
 		self.entriesContainer = $('#entries');
 
 		self.bindEvents();
-		self.loadEntries();
+		self.loadEntries().next(function () {
+			$(window).hashchange();
+		});
 	},
 
 	loadEntries : function (opts) {
 		var self = this;
+		var ret = new Deferred();
 
 		$.ajax({
 			url: "/api/entries",
@@ -67,10 +70,13 @@ SignalReports = {
 				row.data('data', it);
 				row.appendTo(self.entriesContainer);
 			}
+			ret.call();
 		}).
 		fail(function (e) {
+			ret.fail(e);
 		});
 
+		return ret;
 	},
 
 	bindEvents : function () {
