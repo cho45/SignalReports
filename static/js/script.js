@@ -309,7 +309,7 @@ SignalReports = {
 					url: "/api/entries",
 					type : "DELETE",
 					data : { id : id },
-					dataType: 'json',
+					dataType: 'json'
 				}).
 				done(function (data) {
 					self.inputForm.modal('hide');
@@ -325,6 +325,8 @@ SignalReports = {
 	openForm : function (data) {
 		var self = this;
 
+		self.inputForm.find('form')[0].reset();
+
 		if (data) {
 			self.inputForm.find('.edit-type').text('Edit (id=' + data.id + ')');
 			self.inputForm.find('#delete').show();
@@ -337,6 +339,7 @@ SignalReports = {
 
 			var last = self.entriesContainer.find('tr:first').data('data');
 			if (last) {
+				console.log('Filling last data');
 				self.inputFormForm.deserialize({
 					frequency : last.frequency,
 					mode : last.mode
@@ -344,11 +347,13 @@ SignalReports = {
 			}
 
 			if (localStorage.inputBackup) {
+				console.log('Restore from backup');
 				self.inputFormForm.deserialize(localStorage.inputBackup);
 			}
 
 			self.inputForm.data('timer', setInterval(function () {
 				if (self.inputForm.data('changed')) {
+					console.log('backup saved');
 					localStorage.inputBackup = self.inputFormForm.serialize();
 				}
 			}, 1000));
