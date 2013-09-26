@@ -20,6 +20,10 @@ class SignalReports < Sinatra::Base
 		}
 	end
 
+	after do
+		DB.disconnect
+	end
+
 	get "/" do
 		erb :index
 	end
