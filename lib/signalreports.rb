@@ -51,10 +51,14 @@ class SignalReports < Sinatra::Base
 		entry = nil
 
 		if !entry_id || entry_id.empty?
-			entry = Entry.create(data)
+			DB.transaction do
+				entry = Entry.create(data)
+			end
 		else
-			entry = Entry[entry_id] or raise EntryNotFoundError
-			entry.update(data)
+			DB.transaction do
+				entry = Entry[entry_id] or raise EntryNotFoundError
+				entry.update(data)
+			end
 		end
 
 		content_type :json
