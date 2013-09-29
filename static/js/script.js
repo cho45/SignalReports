@@ -331,7 +331,22 @@ SignalReports = {
 	openForm : function (data) {
 		var self = this;
 
-		self.inputForm.find('form')[0].reset();
+		// reset
+		self.inputFormForm.deserialize({
+			frequency : '',
+			mode      : '',
+			date      : '',
+			time      : '',
+			callsign  : '',
+			ur_rst    : '',
+			my_rst    : '',
+			name      : '',
+			address   : '',
+			memo      : '',
+			id        : '',
+		});
+
+		self.inputForm.find('#now').click();
 
 		if (data) {
 			self.inputForm.find('.edit-type').text('Edit (id=' + data.id + ')');
