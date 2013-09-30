@@ -326,6 +326,21 @@ SignalReports = {
 				});
 			}
 		});
+
+		self.inputForm.find('textarea').textcomplete([
+			{
+				match : /(^|\s)(jc[cg]\d{2,})$/i,
+				search : function (query, next) {
+					SignalReports.JCC.resolve(query.toUpperCase()).next(next);
+				},
+				template : function (value) {
+					return value.number + ' (' + value.name + ')';
+				},
+				replace : function (value) {
+					return '$1' + value.number + ' ';
+				}
+			}
+		]);
 	},
 
 	openForm : function (data) {
@@ -343,7 +358,7 @@ SignalReports = {
 			name      : '',
 			address   : '',
 			memo      : '',
-			id        : '',
+			id        : ''
 		});
 
 		self.inputForm.find('#now').click();
@@ -384,6 +399,39 @@ SignalReports = {
 		self.inputForm.modal({
 			keyboard: false
 		});
+	}
+};
+
+SignalReports.JCC = {
+	resolve : function (number) {
+		var ret = new Deferred();
+		$.ajax({
+			url: "/js/jcc.json",
+			type : "GET",
+			data : {},
+			dataType: 'json'
+		}).
+		done(function (data) {
+			SignalReports.JCC.resolve = function (number) {
+				var ret = new Deferred();
+				setTimeout(function () {
+					try {
+						var index = data.index[number];
+						ret.call(data.list.slice(index[0], index[0] + index[1]));
+					} catch (e) {
+						ret.call([]);
+					}
+				}, 0);
+				return ret;
+			};
+			SignalReports.JCC.resolve(number).next(function (list) {
+				ret.call(list);
+			});
+		}).
+		fail(function (e) {
+			ret.fail(e);
+		});
+		return ret;
 	}
 };
 
