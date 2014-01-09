@@ -1,38 +1,37 @@
+var signalReportsApp = angular.module('signalReportsApp', ['ngResource']);
 
-var RST = {
-	R : [
-		"Unreadable",
-		"Barely readable, occasional words distinguishable",
-		"Readable with considerable difficulty",
-		"Readable with practically no difficulty",
-		"Perfectly readable"
-	],
-	S : [
-		"Faint signal, barely perceptible",
-		"Very weak",
-		"Weak",
-		"Fair",
-		"Fairly good",
-		"Good",
-		"Moderately strong",
-		"Strong",
-		"Very strong signals"
-	],
-	T : [
-		"Sixty cycle a.c or less, very rough and broad",
-		"Very rough a.c., very harsh and broad",
-		"Rough a.c. tone, rectified but not filtered",
-		"Rough note, some trace of filtering",
-		"Filtered rectified a.c. but strongly ripple-modulated",
-		"Filtered tone, definite trace of ripple modulation",
-		"Near pure tone, trace of ripple modulation",
-		"Near perfect tone, slight trace of modulation",
-		"Perfect tone, no trace of ripple or modulation of any kind"
-	]
-};
-
-SignalReports = {
-	tz : (new Date().getTimezoneOffset()),
+signalReportsApp.Utils = {
+	RST : {
+		R : [
+			"Unreadable",
+			"Barely readable, occasional words distinguishable",
+			"Readable with considerable difficulty",
+			"Readable with practically no difficulty",
+			"Perfectly readable"
+		],
+		S : [
+			"Faint signal, barely perceptible",
+			"Very weak",
+			"Weak",
+			"Fair",
+			"Fairly good",
+			"Good",
+			"Moderately strong",
+			"Strong",
+			"Very strong signals"
+		],
+		T : [
+			"Sixty cycle a.c or less, very rough and broad",
+			"Very rough a.c., very harsh and broad",
+			"Rough a.c. tone, rectified but not filtered",
+			"Rough note, some trace of filtering",
+			"Filtered rectified a.c. but strongly ripple-modulated",
+			"Filtered tone, definite trace of ripple modulation",
+			"Near pure tone, trace of ripple modulation",
+			"Near perfect tone, slight trace of modulation",
+			"Perfect tone, no trace of ripple or modulation of any kind"
+		]
+	},
 
 	setDateAndTime : function (entry) {
 		var dt = new Date(entry.datetime * 1000);
@@ -40,96 +39,150 @@ SignalReports = {
 		entry.date = dt.strftime('%Y-%m-%d');
 		entry.time = dt.strftime('%H:%M');
 	},
-	
-	init : function () {
-		var self = this;
 
-		self.inputForm = $('#input-form');
-		self.inputFormForm = self.inputForm.find('form');
-		self.entriesContainer = $('#entries');
-
-		self.bindEvents();
-		self.loadEntries().next(function () {
-			$(window).hashchange();
-		});
-	},
-
-	loadEntries : function (opts) {
-		var self = this;
-		var ret = new Deferred();
-
-		$.ajax({
-			url: "/api/entries",
-			type : "GET",
-			data : opts,
-			dataType: 'json'
-		}).
-		done(function (data) {
-			for (var i = 0, it; (it = data.entries[i]); i++) {
-				var row = $(template('entry', it));
-				row.data('data', it);
-				row.appendTo(self.entriesContainer);
-			}
-			ret.call();
-		}).
-		fail(function (e) {
-			ret.fail(e);
-		});
-
-		return ret;
-	},
-
-	bindEvents : function () {
-		var self = this;
-
-		self.inputForm.
-			on('shown.bs.modal', function () {
-				self.inputForm.find('input[name=frequency]').focus();
-			}).
-			on('hide.bs.modal', function () {
-				clearInterval(self.inputForm.data('timer'));
-				if (self.inputForm.data('changed')) {
-					return confirm('Sure?');
-				}
-			});
-
-		self.inputForm.find('form').submit(function () {
-			var $this = $(this);
-			var data = $this.serializeArray();
-			data.push({ name : 'tz', value: (new Date()).getTimezoneOffset()  });
+	JCC : {
+		resolve : function (number) {
+			var ret = new Deferred();
 			$.ajax({
-				url: "/api/entries",
-				type : "POST",
-				data : data,
+				url: "/js/jcc.json",
+				type : "GET",
+				data : {},
 				dataType: 'json'
 			}).
 			done(function (data) {
-				localStorage.inputBackup = '';
-
-				self.inputForm.data('changed', false);
-				self.inputForm.find('form')[0].reset();
-				self.inputForm.modal('hide');
-
-				var row = $(template('entry', data.entry));
-				row.data('data', data.entry);
-
-				var exists = self.entriesContainer.find('[data-id=' + data.entry.id + ']');
-				if (exists.length) {
-					exists.replaceWith(row);
-				} else {
-					row.prependTo(self.entriesContainer);
-				}
+				signalReportsApp.Utils.JCC.resolve = function (number) {
+					var ret = new Deferred();
+					setTimeout(function () {
+						try {
+							var index = data.index[number];
+							ret.call(data.list.slice(index[0], index[0] + index[1]));
+						} catch (e) {
+							ret.call([]);
+						}
+					}, 0);
+					return ret;
+				};
+				signalReportsApp.Utils.JCC.resolve(number).next(function (list) {
+					ret.call(list);
+				});
 			}).
 			fail(function (e) {
+				ret.fail(e);
 			});
-			return false;
-		});
+			return ret;
+		}
+	}
+};
 
-		self.inputForm.find('input, textarea').change(function () {
-			self.inputForm.data('changed', true);
-		});
 
-		self.inputForm.find('input[name=mode]').
+//signalReportsApp.config(function ($httpProvider) {
+//	 $httpProvider.defaults.headers.post =
+//	 $httpProvider.defaults.headers.put =
+//	 $httpProvider.defaults.headers.patch = {
+//		 'Content-Type' : 'application/x-www-form-urlencoded' 
+//	 };
+//});
+
+signalReportsApp.filter('strftime', function () {
+	return function (datetime, format) {
+		return new Date(datetime * 1000).strftime(format) ;
+	};
+});
+
+signalReportsApp.factory('$exceptionHandler', function () {
+	return function (exception, cause) {
+		alert(exception.message);
+	};
+});
+
+
+signalReportsApp.factory('Reports', function ($resource) {
+	var Reports = $resource('/api/entries', { id : '@id' }, {
+		'query':  {
+			method:'GET',
+			isArray: true, 
+			transformResponse : function (data, headers) {
+				data = angular.fromJson(data);
+				if (!data.ok) throw "API failed";
+				Reports.hasMore = data.has_more;
+				Reports.count = data.count;
+				return data.entries;
+			}
+		},
+		'save':  { 
+			method:'POST', 
+			transformResponse : function (data, headers) {
+				data = angular.fromJson(data);
+				if (!data.ok) throw "API failed";
+				return data.entry;
+			},
+			transformRequest: function (data, headers) {
+				var ret = '';
+				for (var key in data) if (data.hasOwnProperty(key)) {
+					var val = data[key];
+					ret += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(val);
+				}
+				return ret;
+			},
+			headers : {
+				'Content-Type' : 'application/x-www-form-urlencoded'
+			}
+		},
+		'delete':  {
+			method:'DELETE', 
+			transformResponse : function (data, headers) {
+				data = angular.fromJson(data);
+				if (!data.ok) throw "API failed";
+				return data.entry;
+			}
+		}
+	});
+	return Reports;
+});
+
+signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $timeout, Reports) {
+	var inputBackupTimer;
+
+	var inputForm = $('#input-form');
+	var inputFormForm = $('#input-form form');
+
+	inputForm.
+		on('shown.bs.modal', function () {
+			var callsign = inputForm.find('input[name=callsign]');
+
+			callsign.
+				focus().
+				typeahead('setQuery', callsign.val());
+		}).
+		on('hide.bs.modal', function () {
+			clearInterval(inputBackupTimer);
+			if ($scope.formChanged) {
+				return confirm('Sure?');
+			}
+		}).
+		find('input, textarea').
+			change(function () {
+				$scope.formChanged = true;
+			}).
+		end().
+		find('#now').
+			click(function () {
+				var date = inputForm.find('input[name=date]');
+				var time = inputForm.find('input[name=time]');
+				var now = new Date();
+				date.val(
+					now.getFullYear() + '-' +
+					String(now.getMonth() + 101).slice(1) + '-' +
+					String(now.getDate() + 100).slice(1)
+				);
+
+				time.val(
+					String(now.getHours() + 100).slice(1) + ':' +
+					String(now.getMinutes() + 100).slice(1)
+				);
+			}).
+		end().
+		find('input[name=mode]').
 			typeahead({
 				name : 'mode',
 				local : [
@@ -141,18 +194,18 @@ SignalReports = {
 				]
 			}).
 			change(function () {
-				var classes = self.inputForm.attr('class');
+				var classes = inputForm.attr('class');
 				for (var i = 0, len = classes.length; i < len; i++) {
 					if (classes[i].match(/^mode-/)) {
-						self.inputForm.removeClass(classes[i]);
+						inputForm.removeClass(classes[i]);
 					}
 				}
 
-				self.inputForm.addClass('mode-' + this.value);
+				inputForm.addClass('mode-' + this.value);
 			}).
-			change();
-
-		self.inputForm.find('input[name=callsign]').
+			change().
+		end().
+		find('input[name=callsign]').
 			typeahead({
 				name : 'callsign',
 				template: 'callcompl',
@@ -169,6 +222,10 @@ SignalReports = {
 				var $this = $(this);
 				$this.val($this.val().toUpperCase());
 
+				if ($this.val() && !inputFormForm.find('input[name=time]').val()) {
+					$('#now').click();
+				}
+
 				$.ajax({
 					url: "/api/callsign",
 					type : "GET",
@@ -177,8 +234,8 @@ SignalReports = {
 				}).
 				done(function (data) {
 					if (data.length && data[0].value === $this.val()) {
-						self.inputForm.find('input[name=name]').val(data[0].name);
-						self.inputForm.find('input[name=address]').val(data[0].address || data[0].country);
+						inputForm.find('input[name=name]').val(data[0].name);
+						inputForm.find('input[name=address]').val(data[0].address || data[0].country);
 					}
 				}).
 				fail(function (e) {
@@ -198,9 +255,9 @@ SignalReports = {
 					e.ctrlKey = false;
 					$this.data('ttView').inputView.trigger('upKeyed', e);
 				}
-			});
-
-		self.inputForm.find('input[name=ur_rst], input[name=my_rst]').
+			}).
+		end().
+		find('input[name=ur_rst], input[name=my_rst]').
 			focus(function () {
 				$(this).parent().find('.rst-dropdown').show();
 			}).
@@ -211,143 +268,63 @@ SignalReports = {
 				var $this = $(this);
 				var rst = $this.val().split('');
 
-				$this.parent().find('tr.readability td').text( (rst[0] || '') + ' ' + (RST.R[rst[0] - 1] || '') );
-				$this.parent().find('tr.strength td').text( (rst[1] || '') + ' ' + (RST.S[rst[1] - 1] || '') );
-				$this.parent().find('tr.tone td').text( (rst[2] || '') + ' ' + (RST.T[rst[2] - 1] || '') );
-			});
-
-		self.inputForm.find('#now').
-			click(function () {
-				var date = self.inputForm.find('input[name=date]');
-				var time = self.inputForm.find('input[name=time]');
-				var now = new Date();
-				date.val(
-					now.getFullYear() + '-' +
-					String(now.getMonth() + 101).slice(1) + '-' +
-					String(now.getDate() + 100).slice(1)
-				);
-
-				time.val(
-					String(now.getHours() + 100).slice(1) + ':' +
-					String(now.getMinutes() + 100).slice(1)
-				);
+				$this.parent().find('tr.readability td').text( (rst[0] || '') + ' ' + (signalReportsApp.Utils.RST.R[rst[0] - 1] || '') );
+				$this.parent().find('tr.strength td').text( (rst[1] || '') + ' ' + (signalReportsApp.Utils.RST.S[rst[1] - 1] || '') );
+				$this.parent().find('tr.tone td').text( (rst[2] || '') + ' ' + (signalReportsApp.Utils.RST.T[rst[2] - 1] || '') );
 			}).
-			click();
-
-		$(window).on('hashchange', function () {
-			if (location.hash === '#new') {
-				self.openForm();
-			} else
-			if (location.hash === '#home') {
-				self.entriesContainer.empty();
-				self.loadEntries({});
-				location.hash = '#';
-			} else
-			if (location.hash.match(/^#find:(.+)/)) {
-				var query = RegExp.$1;
-				self.entriesContainer.empty();
-				self.loadEntries({ query : query });
-			}
-		});
-
-		self.inputForm.on('hidden.bs.modal', function () {
-			location.hash = '';
-		});
-
-		self.entriesContainer.on('click', 'tr', function () {
-			var data = $(this).data('data');
-			self.openForm(data);
-		});
-
-		self.inputForm.find('input').keydown(function (e) {
-			var key = keyString(e);
-			var current = $(this);
-			if (key === 'RET') {
-				var inputs  = current.closest("form").find("input, button").filter(":visible");
-				var next = inputs.eq(inputs.index(this) + 1);
-				if (next.length) {
-					next.focus();
-					return false;
-				}
-			}
-		});
-
-
-//		$(window).on('beforeunload', function () {
-//			return 'Sure to unload?';
-//		});
-//
-
-		$('#search-form').submit(function () {
-			var $this = $('#search');
-			if ($this.val()) {
-				location.hash = '#find:' + $this.val();
-			} else {
-				location.hash = '#home';
-			}
-			$this.data('prev', $this.val());
-			return false;
-		});
-
-		$('#search').
-			keyup(function () {
-				var $this = $(this);
-				var timer  = $this.data('timer');
-
-				clearTimeout(timer);
-				$this.data('timer', setTimeout(function () {
-					console.log('timer', [$this.data('prev'), $this.val()]);
-					if ($this.data('prev') !== $this.val()) {
-						if ($this.val()) {
-							location.hash = '#find:' + $this.val();
-						} else {
-							location.hash = '#home';
-						}
-						$this.data('prev', $this.val());
+		end().
+		find('textarea').
+			textcomplete([
+				{
+					match : /(^|\s)(jc[cg]\d{2,})$/i,
+					search : function (query, next) {
+						signalReportsApp.Utils.JCC.resolve(query.toUpperCase()).next(next);
+					},
+					template : function (value) {
+						return value.number + ' (' + value.name + ')';
+					},
+					replace : function (value) {
+						return '$1' + value.number + ' ';
 					}
-				}, 500));
-			});
-
-		$('#delete').click(function () {
-			if (confirm('Sure to delete this entry?')) {
-				var id = self.inputForm.find('[name=id]').val();
-				$.ajax({
-					url: "/api/entries",
-					type : "DELETE",
-					data : { id : id },
-					dataType: 'json'
-				}).
-				done(function (data) {
-					self.inputForm.modal('hide');
-					location.hash = '#home';
-				}).
-				fail(function (e) {
-					alert(e);
-				});
-			}
-		});
-
-		self.inputForm.find('textarea').textcomplete([
-			{
-				match : /(^|\s)(jc[cg]\d{2,})$/i,
-				search : function (query, next) {
-					SignalReports.JCC.resolve(query.toUpperCase()).next(next);
-				},
-				template : function (value) {
-					return value.number + ' (' + value.name + ')';
-				},
-				replace : function (value) {
-					return '$1' + value.number + ' ';
 				}
-			}
-		]);
-	},
+			]).
+		end()
+		;
 
-	openForm : function (data) {
-		var self = this;
+	$scope.search = function me (immediate) {
+		if (me.timer) $timeout.cancel(me.timer);
 
-		// reset
-		self.inputFormForm.deserialize({
+		if (immediate) {
+			$scope.load();
+			me.prev = $scope.query;
+		} else {
+			me.timer = $timeout(function () {
+				if (me.prev !== $scope.query) {
+					$scope.load();
+					me.prev = $scope.query;
+				}
+			}, 500);
+		} 
+	};
+
+
+	$scope.load = function () {
+		$scope.reports = Reports.query({ query : $scope.query }, function (data) {
+			$scope.hasMore = Reports.hasMore;
+		});
+	};
+
+	$scope.loadNext = function () {
+		var before = $scope.reports[$scope.reports.length-1].id;
+		var reports = Reports.query({ query : $scope.query, before: before }, function (data) {
+			$scope.reports = $scope.reports.concat(reports);
+			$scope.hasMore = Reports.hasMore;
+		});
+	};
+
+	$scope.openForm = function (report) {
+		// reset form
+		inputFormForm.deserialize({
 			frequency : '',
 			mode      : '',
 			date      : '',
@@ -361,22 +338,24 @@ SignalReports = {
 			id        : ''
 		});
 
-		self.inputForm.find('#now').click();
+		if (report) {
+			$scope.editing = report;
 
-		if (data) {
-			self.inputForm.find('.edit-type').text('Edit (id=' + data.id + ')');
-			self.inputForm.find('#delete').show();
-
-			SignalReports.setDateAndTime(data);
-			self.inputFormForm.deserialize(data);
+			inputForm.find('.edit-type').text('Edit (id=' + report.id + ')');
+			inputForm.find('#delete').show();
+			var data = angular.copy(report);
+			signalReportsApp.Utils.setDateAndTime(data);
+			inputFormForm.deserialize(data);
 		} else {
-			self.inputForm.find('.edit-type').text('New');
-			self.inputForm.find('#delete').hide();
+			$scope.editing = new Reports({});
 
-			var last = self.entriesContainer.find('tr:first').data('data');
+			inputForm.find('.edit-type').text('New');
+			inputForm.find('#delete').hide();
+
+			var last = $scope.reports[0];
 			if (last) {
-				console.log('Filling last data');
-				self.inputFormForm.deserialize({
+				// fill in partial data
+				inputFormForm.deserialize({
 					frequency : last.frequency,
 					mode : last.mode
 				});
@@ -384,58 +363,67 @@ SignalReports = {
 
 			if (localStorage.inputBackup) {
 				console.log('Restore from backup');
-				self.inputFormForm.deserialize(localStorage.inputBackup);
+				inputFormForm.deserialize(localStorage.inputBackup);
 			}
 
-			self.inputForm.data('timer', setInterval(function () {
-				if (self.inputForm.data('changed')) {
+			inputBackupTimer = setInterval(function () {
+				if ($scope.formChanged) {
+					localStorage.inputBackup = inputFormForm.serialize();
 					console.log('backup saved');
-					localStorage.inputBackup = self.inputFormForm.serialize();
 				}
-			}, 1000));
+			}, 1000);
 		}
 
-		self.inputForm.data('changed', false);
-		self.inputForm.modal({
+		$scope.formChanged = false;
+
+		inputForm.modal({
 			keyboard: false
 		});
-	}
-};
+	};
 
-SignalReports.JCC = {
-	resolve : function (number) {
-		var ret = new Deferred();
-		$.ajax({
-			url: "/js/jcc.json",
-			type : "GET",
-			data : {},
-			dataType: 'json'
-		}).
-		done(function (data) {
-			SignalReports.JCC.resolve = function (number) {
-				var ret = new Deferred();
-				setTimeout(function () {
-					try {
-						var index = data.index[number];
-						ret.call(data.list.slice(index[0], index[0] + index[1]));
-					} catch (e) {
-						ret.call([]);
+	$scope.deleteReport = function () {
+		if (confirm('Sure to delete this entry?')) {
+			var id = inputForm.find('[name=id]').val();
+			inputForm.modal('hide');
+
+			$scope.editing.$delete(function () {
+				for (var i = 0, it; (it = $scope.reports[i]); i++) {
+					if (it.id === $scope.editing.id) {
+						$scope.reports.splice(i, 1);
+						break;
 					}
-				}, 0);
-				return ret;
-			};
-			SignalReports.JCC.resolve(number).next(function (list) {
-				ret.call(list);
+				}
+				$scope.editing = null;
 			});
-		}).
-		fail(function (e) {
-			ret.fail(e);
+		}
+	};
+
+	$scope.submit = function () {
+		console.log('submit');
+
+		var report = $scope.editing;
+		var isNew = !report.id;
+		var data = inputFormForm.serializeArray();
+		for (var i = 0, it; (it = data[i]); i++) {
+			report[it.name] = it.value;
+		}
+		report.tz = (new Date()).getTimezoneOffset();
+
+		report.$save(function () {
+			localStorage.inputBackup = '';
+			$scope.formChanged = false;
+			$scope.editing = null;
+			inputForm.find('form')[0].reset();
+			inputForm.modal('hide');
+			if (isNew) {
+				$scope.reports.unshift(report);
+			}
 		});
-		return ret;
-	}
-};
+	};
 
-
-$(function () {
-	SignalReports.init();
+	$scope.query = "";
+	$scope.hasMore = false;
+	$scope.editing = null;
+	$scope.orderProp = 'id';
+	$scope.load();
 });

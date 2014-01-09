@@ -81,12 +81,16 @@ class SignalReports < Sinatra::Base
 			data = data.where('id < ?', before)
 		end
 
-		entries = data.order(Sequel.desc(:datetime)).limit(100).all
+		limit   = 5
+		count   = data.count
+		entries = data.order(Sequel.desc(:datetime)).limit(limit+1).all
 
 		content_type :json
 		{
 			"ok" => true,
-			"entries" =>  entries.map {|i|
+			"count" => count,
+			"has_more" => entries.length > limit,
+			"entries" =>  entries.first(limit).map {|i|
 				i.to_stash
 			}
 		}.to_json
