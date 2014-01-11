@@ -8,5 +8,6 @@ gem "sequel"
 gem "sinatra-contrib"
 gem "rack-test"
 gem "rspec"
+gem "glint", ">=0.0.2"
 
 

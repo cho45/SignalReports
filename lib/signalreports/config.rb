@@ -15,6 +15,7 @@ class SignalReports < Sinatra::Base
 		test_db = "sqlite://#{Dir.tmpdir}/#{$$}-#{(0...5).map{ ('a'..'z').to_a[rand(26)] }.join}.db"
 		warn "Using DB: #{test_db}"
 		set :db, test_db
+		disable :logging
 	end
 end
 

@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+
+require "glint"
+
+ENV['RACK_ENV'] = 'test'
+
+server = Glint::Server.new do |port|
+	require "rack"
+	require "webrick"
+
+	Rack::Server.start(
+		server: 'webrick',
+		config: 'config.ru',
+		Port: port,
+		AccessLog: [],
+		Logger: WEBrick::Log.new('/dev/null'),
+	)
+end.start
+
+
+if system("protractor", "--baseUrl", "http://localhost:#{server.port}", "tests/e2e/protractor.conf.js")
+	exit 0
+else
+	exit 1
+end

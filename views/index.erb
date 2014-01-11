@@ -14,9 +14,9 @@
 
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
 
+		<script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>
 		<script type="text/javascript" src="/js/angular.min.js"></script>
 		<script type="text/javascript" src="/js/angular-resource.min.js"></script>
-		<script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>
 		<script type="text/javascript" src="/js/micro-template.js"></script>
 		<script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="/js/typeahead.min.js"></script>
@@ -41,7 +41,6 @@
 			</div>
 			<div class="collapse navbar-collapse">
 				<ul class="nav navbar-nav">
-					<li class="active"><a href="#">List</a></li>
 					<li><a href="#new" ng-click="openForm()">New report</a></li>
 				</ul>
 				<form class="navbar-form navbar-right" id="search-form" ng-submit="search(true)">
@@ -86,15 +85,15 @@
 				<a href="#" class="btn btn-default btn-block" ng-click="loadNext()" ng-show="hasMore"><span class="glyphicon glyphicon-chevron-down"></span></a>
 			</div>
 
-			<div class="modal" id="input-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+			<div class="modal" id="input-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true" sr-edit-dialog>
 				<div class="modal-dialog" style="width: 1000px">
 					<div class="modal-content">
 						<form class="form-inline" role="form" ng-submit="submit()">
 							<div class="modal-header">
-								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+								<button type="button" class="close" ng-click="closeForm()" aria-hidden="true">&times;</button>
 								<h4 class="modal-title">
-									<span class="glyphicon glyphicon-headphones"></span> Signal Report: <span class="edit-type">AA</span>
-									<input type="button" class="btn btn-danger btn-xs" id="delete" value="Delete" ng-click="deleteReport()"/>
+									<span class="glyphicon glyphicon-headphones"></span> Signal Report: <span class="edit-type" ng-bind="editType">{{}}</span>
+									<input type="button" class="btn btn-danger btn-xs" id="delete" value="Delete" ng-click="deleteReport()" ng-hide="isNew"/>
 								</h4>
 							</div>
 							<div class="modal-body">
@@ -104,7 +103,7 @@
 											<span class="input-group-addon">
 												Freq.
 											</span>
-											<input type="text" size="12" name="frequency" class="form-control" value="" placeholder="Frequency" required/>
+											<input type="text" size="12" name="frequency" class="form-control" value="" placeholder="Frequency" required ng-model="editingReport.frequency"/>
 											<span class="input-group-addon">
 												MHz
 											</span>
@@ -115,7 +114,7 @@
 											<span class="input-group-addon">
 												Mode
 											</span>
-											<input type="text" size="5" name="mode" class="form-control input-sm" value="CW" required/>
+											<input type="text" size="5" name="mode" class="form-control input-sm" value="CW" required ng-model="editingReport.mode" sr-typeahead-mode/>
 										</div>
 									</div>
 									<div class="col-lg-3">
@@ -123,7 +122,7 @@
 											<span class="input-group-addon">
 												Date
 											</span>
-											<input type="date" name="date" class="form-control" value="" required/>
+											<input type="date" name="date" class="form-control" value="" required ng-model="editingReport.date"/>
 										</div>
 									</div>
 									<div class="col-lg-3">
@@ -131,9 +130,9 @@
 											<span class="input-group-addon">
 												Time
 											</span>
-											<input type="time" name="time" class="form-control" value="" required/>
+											<input type="time" name="time" class="form-control" value="" required ng-model="editingReport.time"/>
 											<span class="input-group-btn">
-												<button class="btn btn-default" type="button" id="now">Now</button>
+												<button class="btn btn-default" type="button" ng-click="setDateTime()">Now</button>
 											</span>
 										</div>
 									</div>
@@ -144,7 +143,7 @@
 											<span class="input-group-addon">
 												Call sign
 											</span>
-											<input type="text" size="10" name="callsign" class="form-control input-sm" required/>
+											<input type="text" size="10" name="callsign" class="form-control input-sm" required ng-model="editingReport.callsign" sr-typeahead-callsign/>
 											<script type="application/x-template" id="callcompl">
 												<p style="width: 400px">
 												[% if (this.stash.count) { %]
@@ -163,7 +162,7 @@
 											<span class="input-group-addon">
 												UR RST
 											</span>
-											<input type="text" size="3" name="ur_rst" class="form-control input-sm" value="" placeholder="599" required/>
+											<input type="text" size="3" name="ur_rst" class="form-control input-sm" value="" placeholder="599" required ng-model="editingReport.ur_rst"/>
 											<span class="rst-container">
 												<div class="rst-dropdown dropdown-menu">
 													<table>
@@ -189,7 +188,7 @@
 											<span class="input-group-addon">
 												MY RST
 											</span>
-											<input type="text" size="3" name="my_rst" class="form-control input-sm" value="" placeholder="599" required/>
+											<input type="text" size="3" name="my_rst" class="form-control input-sm" value="" placeholder="599" required ng-model="editingReport.my_rst"/>
 											<span class="rst-container">
 												<div class="rst-dropdown dropdown-menu">
 													<table>
@@ -217,7 +216,7 @@
 											<span class="input-group-addon">
 												Name
 											</span>
-											<input type="text" size="10" name="name" class="form-control input-sm"/>
+											<input type="text" size="10" name="name" class="form-control input-sm" ng-model="editingReport.name"/>
 										</div>
 									</div>
 									<div class="col-lg-8">
@@ -225,7 +224,7 @@
 											<span class="input-group-addon">
 												QTH
 											</span>
-											<input type="text" size="10" name="address" class="form-control input-sm"/>
+											<input type="text" size="10" name="address" class="form-control input-sm" ng-model="editingReport.address"/>
 										</div>
 									</div>
 								</div>
@@ -236,7 +235,7 @@
 												Memo
 											</span>
 											<div>
-												<textarea name="memo" class="form-control" style="display: block; width: 100%; height: 10em"></textarea>
+												<textarea name="memo" class="form-control" style="display: block; width: 100%; height: 10em" ng-model="editingReport.memo"></textarea>
 											</div>
 										</div>
 									</div>
