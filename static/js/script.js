@@ -237,8 +237,10 @@ signalReportsApp.directive('srEditDialog', function () {
 						}).
 						done(function (data) {
 							if (data.length && data[0].value === $this.val()) {
-								inputForm.find('input[name=name]').val(data[0].name);
-								inputForm.find('input[name=address]').val(data[0].address || data[0].country);
+								var name = inputForm.find('input[name=name]');
+								var address = inputForm.find('input[name=address]');
+								if (!name.val()) name.val(data[0].name);
+								if (!address.val()) address.val(data[0].address || data[0].country);
 							}
 						}).
 						fail(function (e) {
@@ -342,6 +344,7 @@ signalReportsApp.directive('srEditDialog', function () {
 						inputFormForm.deserialize(data);
 					}
 
+					scope.inputFormData = inputFormForm.serializeArray();
 					inputForm.modal({
 						keyboard: false
 					});
