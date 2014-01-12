@@ -176,7 +176,7 @@ describe("SignalReports", function () {
 	it("should have pager", function () {
 		var signalReports = new SignalReports();
 		var dt = 1, reports = [];
-		for (var i = 0; i < 10; i++) {
+		for (var i = 0; i < 11; i++) {
 			reports.unshift(signalReports.createNewReport({ datetime: dt++ }));
 		}
 
@@ -188,6 +188,14 @@ describe("SignalReports", function () {
 		expect(element(row.column('callsign')).getText()).toEqual( reports[0].callsign );
 
 		expect($('#more').isDisplayed()).toBe(true);
+
+		$('#more').click();
+		expect(element.all(by.repeater('report in reports')).count()).toBe(10);
+		expect($('#more').isDisplayed()).toBe(true);
+
+		$('#more').click();
+		expect(element.all(by.repeater('report in reports')).count()).toBe(14);
+		expect($('#more').isDisplayed()).toBe(false);
 	});
 
 });
