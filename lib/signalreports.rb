@@ -83,7 +83,7 @@ class SignalReports < Sinatra::Base
 
 		limit   = settings.report_per_page
 		count   = data.count
-		entries = data.order(Sequel.desc(:datetime)).limit(limit+1).all
+		entries = data.order(Sequel.desc(:id)).limit(limit+1).all
 
 		content_type :json
 		{

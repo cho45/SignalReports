@@ -113,6 +113,8 @@ describe("SignalReports", function () {
 		expect(element(row.column('address')).getText()).toEqual('Japan');
 		expect(element(row.column('memo')).getText()).toEqual('TEST MEMO');
 		expect(element(row.column('name')).getText()).toEqual('HIRO');
+
+		expect(element.all(by.repeater('report in reports')).count()).toBe(1);
 	});
 
 	it("should post edit report", function () {
@@ -144,6 +146,8 @@ describe("SignalReports", function () {
 
 		expect(element(row.column('callsign')).getText()).toEqual('JH1UMVV');
 		expect(element(row.column('memo')).getText()).toEqual('TEST MEMO2');
+
+		expect(element.all(by.repeater('report in reports')).count()).toBe(1);
 	});
 
 
@@ -171,6 +175,8 @@ describe("SignalReports", function () {
 
 		expect(signalReports.inputDialog.isDisplayed()).toBe(false);
 		expect(signalReports.inputDelete.isDisplayed()).toBe(false);
+
+		expect(element.all(by.repeater('report in reports')).count()).toBe(0);
 	});
 	
 	it("should have pager", function () {
@@ -194,8 +200,9 @@ describe("SignalReports", function () {
 		expect($('#more').isDisplayed()).toBe(true);
 
 		$('#more').click();
-		expect(element.all(by.repeater('report in reports')).count()).toBe(14);
+		expect(element.all(by.repeater('report in reports')).count()).toBe(11);
 		expect($('#more').isDisplayed()).toBe(false);
+
 	});
 
 });
