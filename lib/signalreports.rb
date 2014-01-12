@@ -72,7 +72,7 @@ class SignalReports < Sinatra::Base
 	get "/api/entries" do
 		data = Entry
 
-		if request["query"]
+		if request["query"] && !request["query"].empty?
 			data = data.where(Sequel.join([:callsign, :frequency, :mode, :name, :address, :memo]).like("%#{request["query"]}%", :case_insensitive => true))
 		end
 
@@ -81,7 +81,7 @@ class SignalReports < Sinatra::Base
 			data = data.where('id < ?', before)
 		end
 
-		limit   = 5
+		limit   = settings.report_per_page
 		count   = data.count
 		entries = data.order(Sequel.desc(:datetime)).limit(limit+1).all
 

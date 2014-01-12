@@ -1,0 +1,24 @@
+{
+    "name": "SignalReports",
+        "version": "0.0.0",
+        "description": "",
+        "main": "",
+        "devDependencies": {
+            "string_random.js": "0"
+        },
+        "directories": {
+            "test": "tests"
+        },
+        "scripts": {
+            "test": "bundle exec tests/e2e/run"
+        },
+        "repository": {
+            "type": "git",
+            "url": "git://github.com/cho45/SignalReports.git"
+        },
+        "author": "cho45",
+        "bugs": {
+            "url": "https://github.com/cho45/SignalReports/issues"
+        },
+        "homepage": "https://github.com/cho45/SignalReports"
+}

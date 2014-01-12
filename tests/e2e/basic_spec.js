@@ -1,3 +1,6 @@
+#!node
+
+var String_random = require("string_random.js").String_random;
 
 var SignalReports = function () {
 	this.inputDialog = $('#input-form');
@@ -29,6 +32,44 @@ var SignalReports = function () {
 	};
 
 	this.createNewReport  = function (data) {
+		if (!data) data = {};
+
+		if (data.datetime) {
+			var now = data.datetime instanceof Date ? data.datetime : new Date(data.datetime);
+			data.date = 
+				now.getFullYear() + '-' +
+				String(now.getMonth() + 101).slice(1) + '-' +
+				String(now.getDate() + 100).slice(1);
+
+			data.time = 
+				String(now.getHours() + 100).slice(1) + ':' +
+				String(now.getMinutes() + 100).slice(1);
+		}
+
+		if (!data.callsign) data.callsign = String_random(/J[A-Z][0-9][A-Z]{3}/);
+		if (!data.frequency) data.frequency =  String_random(/7\.\d{3}/);
+		if (!data.mode) data.mode = String_random(/(CW|SSB|FM|AM|RTTY)/);
+		if (!data.date) data.date = String_random(/200\d-(0[1-9]|1[0-2])-([1-2][1-9]|3[01])/);
+		if (!data.time) data.time = String_random(/(0[0-9]|1[0-2]):[1-5][0-9]/);
+		if (!data.ur_rst) data.ur_rst = String_random(/\d{3}/);
+		if (!data.my_rst) data.my_rst = String_random(/\d{3}/);
+		data.tz = 0;
+
+		this.exec(function (data, callback) {
+			angular.injector(['signalReportsApp']).invoke(function (Reports) {
+				var report = new Reports();
+				for (var key in data) if (data.hasOwnProperty(key)) report[key] = data[key];
+				report.$save(callback);
+			});
+		}, data);
+
+		return data;
+	};
+
+	this.exec = function (func) {
+		var args = Array.prototype.slice.call(arguments, 0);
+		args[0] = '('+ (func.toString()) + ').apply(null, arguments);';
+		browser.executeAsyncScript.apply(browser, args);
 	};
 };
 
@@ -131,6 +172,24 @@ describe("SignalReports", function () {
 		expect(signalReports.inputDialog.isDisplayed()).toBe(false);
 		expect(signalReports.inputDelete.isDisplayed()).toBe(false);
 	});
+	
+	it("should have pager", function () {
+		var signalReports = new SignalReports();
+		var dt = 1, reports = [];
+		for (var i = 0; i < 10; i++) {
+			reports.unshift(signalReports.createNewReport({ datetime: dt++ }));
+		}
+
+		browser.navigate().refresh();
+
+		expect(element.all(by.repeater('report in reports')).count()).toBe(5);
+
+		var row = by.repeater('report in reports').row(0);
+		expect(element(row.column('callsign')).getText()).toEqual( reports[0].callsign );
+
+		expect($('#more').isDisplayed()).toBe(true);
+	});
+
 });
 
 
