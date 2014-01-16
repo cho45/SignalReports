@@ -330,6 +330,7 @@ signalReportsApp.directive('srEditDialog', function () {
 						if (localStorage.inputBackup) {
 							console.log('Restore from backup');
 							inputFormForm.deserialize(localStorage.inputBackup);
+							$('input, textarea').change();
 						}
 
 						inputBackupTimer = setInterval(function () {
@@ -356,7 +357,21 @@ signalReportsApp.directive('srEditDialog', function () {
 	};
 });
 
-signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $timeout, Reports) {
+signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $timeout, $document, Reports) {
+	$document.bind('keydown', function (e) {
+		var key = keyString(e);
+		if (key === 'C-RET') {
+			e.preventDefault();
+			if ($scope.editing) {
+				$scope.submit();
+			} else {
+				$scope.openForm();
+			}
+			$scope.$apply();
+		} else {
+		}
+	});
+
 	$scope.search = function me (immediate) {
 		if (me.timer) $timeout.cancel(me.timer);
 
@@ -390,6 +405,7 @@ signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $ti
 	};
 
 	$scope.openForm = function (report) {
+		console.log('openForm', $scope.editing);
 		if (report) {
 			$scope.editing = report;
 			$scope.isNew   = false;
@@ -400,7 +416,6 @@ signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $ti
 			$scope.editType = 'New';
 		}
 		$scope.editingReport = signalReportsApp.Utils.setDateAndTime(angular.copy($scope.editing));
-		console.log($scope.editingReport);
 	};
 
 	$scope.closeForm = function () {
@@ -423,6 +438,7 @@ signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $ti
 	};
 
 	$scope.submit = function () {
+		console.log('submit');
 		var report = $scope.editing;
 		var data = $scope.editingReport;
 		for (var key in data) if (data.hasOwnProperty(key)) {

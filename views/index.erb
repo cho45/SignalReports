@@ -44,11 +44,16 @@
 					<li><a href="#new" ng-click="openForm()">New report</a></li>
 					<li><a>Total: {{ total }}</a></li>
 				</ul>
-				<form class="navbar-form navbar-right" id="search-form" ng-submit="search(true)">
+				<form class="navbar-form navbar-left" id="search-form" ng-submit="search(true)">
 					<div class="form-group">
 						<input type="search" placeholder="Search" class="form-control" ng-model="query" ng-keyup="search()">
 					</div>
 				</form>
+				<ul class="nav navbar-nav navbar-right">
+					<li>
+						<a href=""><span class="glyphicon glyphicon-cog"></span> Setting</a>
+					</li>
+				</ul>
 			</div><!--/.nav-collapse -->
 		</div>
 
