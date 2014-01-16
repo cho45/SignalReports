@@ -38,6 +38,7 @@ signalReportsApp.Utils = {
 
 		entry.date = dt.strftime('%Y-%m-%d');
 		entry.time = dt.strftime('%H:%M');
+		return entry;
 	},
 
 	JCC : {
@@ -197,21 +198,9 @@ signalReportsApp.directive('srEditDialog', function () {
 						focus().
 						typeahead('setQuery', callsign.val());
 				}).
-				on('hide.bs.modal', function () {
-					clearInterval(inputBackupTimer);
-					if (scope.formChanged) {
-						if (confirm('Sure?')) {
-							scope.editing = null;
-							return true;
-						} else {
-							return false;
-						}
-					}
-				}).
 				find('input, textarea').
 					change(function () {
 						scope.formChanged = true;
-						scope.inputFormData = inputFormForm.serializeArray();
 					}).
 				end().
 				find('input[name=mode]').
@@ -230,7 +219,7 @@ signalReportsApp.directive('srEditDialog', function () {
 				find('input[name=callsign]').
 					blur(function () {
 						var $this = $(this);
-						$this.val($this.val().toUpperCase());
+						$this.val($this.val().toUpperCase()).change();
 
 						if ($this.val() && !inputFormForm.find('input[name=time]').val()) {
 							$('#now').click();
@@ -244,10 +233,9 @@ signalReportsApp.directive('srEditDialog', function () {
 						}).
 						done(function (data) {
 							if (data.length && data[0].value === $this.val()) {
-								var name = inputForm.find('input[name=name]');
-								var address = inputForm.find('input[name=address]');
-								if (!name.val()) name.val(data[0].name);
-								if (!address.val()) address.val(data[0].address || data[0].country);
+								if (!scope.editingReport.name) scope.editingReport.name = data[0].name || '';
+								if (!scope.editingReport.address) scope.editingReport.address = data[0].address || data[0].country || '';
+								scope.$apply();
 							}
 						}).
 						fail(function (e) {
@@ -303,8 +291,6 @@ signalReportsApp.directive('srEditDialog', function () {
 				end()
 				;
 			
-			scope.formChanged = false;
-
 			scope.$watch('editing', function (report) {
 				console.log('editing');
 				// reset form
@@ -324,14 +310,24 @@ signalReportsApp.directive('srEditDialog', function () {
 
 				if (report) {
 					scope.formChanged = false;
+					inputForm.unbind('hide.bs.modal').on('hide.bs.modal', function () {
+						clearInterval(inputBackupTimer);
+						if (scope.editing && scope.formChanged) {
+							if (confirm('Sure?')) {
+								scope.editing = null;
+								return true;
+							} else {
+								return false;
+							}
+						}
+					});
+
 					if (scope.isNew) {
 						var last = scope.reports[0];
 						if (last) {
 							// fill in partial data
-							inputFormForm.deserialize({
-								frequency : last.frequency,
-								mode : last.mode
-							});
+							scope.editingReport.frequency = last.frequency;
+							scope.editingReport.mode = last.mode;
 						}
 
 						if (localStorage.inputBackup) {
@@ -351,7 +347,6 @@ signalReportsApp.directive('srEditDialog', function () {
 						inputFormForm.deserialize(data);
 					}
 
-					scope.inputFormData = inputFormForm.serializeArray();
 					inputForm.modal({
 						keyboard: false
 					});
@@ -407,6 +402,7 @@ signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $ti
 			$scope.isNew   = true;
 			$scope.editType = 'New';
 		}
+		$scope.editingReport = signalReportsApp.Utils.setDateAndTime($scope.editing);
 	};
 
 	$scope.closeForm = function () {
@@ -423,13 +419,14 @@ signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $ti
 					}
 				}
 				$scope.editing = null;
+				$scope.total--;
 			});
 		}
 	};
 
 	$scope.submit = function () {
 		var report = $scope.editing;
-		var data = $scope.inputFormData;
+		var data = $scope.editingReport;
 		for (var i = 0, it; (it = data[i]); i++) {
 			report[it.name] = it.value;
 		}

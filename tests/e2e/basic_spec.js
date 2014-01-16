@@ -107,8 +107,8 @@ describe("SignalReports", function () {
 
 		var row = by.repeater('report in reports').row(0);
 		expect(element(row.column('callsign')).getText()).toEqual('JH1UMV');
-		expect(element(row.column('mode')).getText()).toEqual('CW');
-		expect(element(row.column('frequency')).getText()).toEqual('7.1');
+		expect(element(row.column('report.mode')).getText()).toEqual('CW');
+		expect(element(row.column('frequency')).getText()).toEqual('7.100,00');
 		expect(element(row.column('ur_rst')).getText()).toEqual('599');
 		expect(element(row.column('my_rst')).getText()).toEqual('589');
 		expect(element(row.column('datetime')).getText()).toMatch(/^\d\d\d\d-\d\d-\d\d \d\d:\d\d$/);
@@ -139,7 +139,7 @@ describe("SignalReports", function () {
 
 		var row = by.repeater('report in reports').row(0);
 		expect(element(row.column('mode')).getText()).toEqual('CW');
-		expect(element(row.column('frequency')).getText()).toEqual('7.1');
+		expect(element(row.column('frequency')).getText()).toEqual('7.100,00');
 		expect(element(row.column('ur_rst')).getText()).toEqual('599');
 		expect(element(row.column('my_rst')).getText()).toEqual('589');
 		expect(element(row.column('datetime')).getText()).toMatch(/^\d\d\d\d-\d\d-\d\d \d\d:\d\d$/);
