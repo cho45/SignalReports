@@ -200,6 +200,7 @@ signalReportsApp.directive('srEditDialog', function () {
 				}).
 				find('input, textarea').
 					change(function () {
+					console.log('formChanged');
 						scope.formChanged = true;
 					}).
 				end().
@@ -217,13 +218,17 @@ signalReportsApp.directive('srEditDialog', function () {
 					change().
 					blur(function () {
 						var $this = $(this);
-						$this.val($this.val().toUpperCase()).change();
+						if ($this.val() != $this.val().toUpperCase()) {
+							$this.val($this.val().toUpperCase()).change();
+						}
 					}).
 				end().
 				find('input[name=callsign]').
 					blur(function () {
 						var $this = $(this);
-						$this.val($this.val().toUpperCase()).change();
+						if ($this.val() != $this.val().toUpperCase()) {
+							$this.val($this.val().toUpperCase()).change();
+						}
 
 						if ($this.val() && !inputFormForm.find('input[name=time]').val()) {
 							$('#now').click();
@@ -297,32 +302,20 @@ signalReportsApp.directive('srEditDialog', function () {
 			
 			scope.$watch('editing', function (report) {
 				console.log('editing');
-				// reset form
-				inputFormForm.deserialize({
-					frequency : '',
-					mode      : '',
-					date      : '',
-					time      : '',
-					callsign  : '',
-					ur_rst    : '',
-					my_rst    : '',
-					name      : '',
-					address   : '',
-					memo      : '',
-					id        : ''
-				});
-
 				if (report) {
 					scope.formChanged = false;
-					inputForm.unbind('hide.bs.modal').on('hide.bs.modal', function () {
+					inputForm.on('hide.bs.modal', function () {
+						inputForm.unbind('hide.bs.modal');
 						clearInterval(inputBackupTimer);
-						if (scope.editing && scope.formChanged) {
+						if (scope.formChanged) {
 							if (confirm('Sure?')) {
 								scope.editing = null;
 								return true;
 							} else {
 								return false;
 							}
+						} else {
+							scope.editing = null;
 						}
 					});
 

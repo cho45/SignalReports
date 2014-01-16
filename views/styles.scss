@@ -54,20 +54,36 @@ body.modal-open, .modal-open .navbar-fixed-top, .modal-open .navbar-fixed-bottom
 }
 
 #entries {
+	.callsign {
+		width: 5em;
+	}
+
 	.frequency {
 		text-align: right;
+		width: 7em;
 	}
 
 	.mode {
 		text-align: center;
+		width: 3em;
 	}
 
 	.datetime {
 		text-align: center;
+		width: 10em;
 	}
 
 	.rst {
 		text-align: center;
+		width: 5em;
+	}
+
+	.name {
+		width: 7em;
+	}
+
+	.address {
+		width: 10em;
 	}
 }
 

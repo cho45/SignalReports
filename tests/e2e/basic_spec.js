@@ -89,11 +89,9 @@ describe("SignalReports", function () {
 		signalReports.openForm();
 		expect(signalReports.inputDialog.isDisplayed()).toBe(true);
 
-		signalReports.inputs.callsign.sendKeys('JH1UMV');
 		signalReports.inputs.mode.sendKeys('CW');
 		signalReports.inputs.frequency.sendKeys('7.1');
-
-		signalReports.inputs.ur_rst.click();
+		signalReports.inputs.callsign.sendKeys("JH1UMV\t");
 
 		expect(signalReports.inputs.date.getAttribute('value')).toMatch(/^\d\d\d\d-\d\d-\d\d$/);
 		expect(signalReports.inputs.time.getAttribute('value')).toMatch(/^\d\d:\d\d$/);
@@ -130,7 +128,19 @@ describe("SignalReports", function () {
 		signalReports.inputs.callsign.clear();
 		signalReports.inputs.callsign.sendKeys('JH1UMVV');
 
-		signalReports.inputs.ur_rst.click();
+		// cancel
+		$('#input-form .close').click();
+		var alert = browser.switchTo().alert();
+		expect(alert.getText()).toMatch(/Sure/);
+		alert.accept();
+		expect(signalReports.inputDialog.isDisplayed()).toBe(false);
+		expect(element(by.repeater('report in reports').row(0).column('callsign')).getText()).toEqual('JH1UMV');
+		element(by.repeater('report in reports').row(0)).click();
+
+		expect(signalReports.inputDialog.isDisplayed()).toBe(true);
+
+		signalReports.inputs.callsign.clear();
+		signalReports.inputs.callsign.sendKeys("JH1UMVV\t");
 
 		signalReports.inputs.memo.clear();
 		signalReports.inputs.memo.sendKeys('TEST MEMO2');

@@ -69,7 +69,7 @@
 				</thead>
 				<tbody id="entries">
 					<tr ng-repeat="report in reports | orderBy:orderProp:true" ng-click="openForm(report)" data-id="{{ report.id }}">
-						<td>{{ report.callsign }}</td>
+						<td class="callsign">{{ report.callsign }}</td>
 						<td class="frequency">{{ report.frequency | frequency }}</td>
 						<td class="mode"><span class="label label-{{ report.mode | lowercase }} ng-binding">{{ report.mode }}</span></td>
 						<td class="datetime"><time data-epoch="{{ report.datetime * 1000 }}">{{ report.datetime | strftime:"%Y-%m-%d %H:%M" }}</time></td>
