@@ -215,6 +215,10 @@ signalReportsApp.directive('srEditDialog', function () {
 						inputForm.addClass('mode-' + this.value);
 					}).
 					change().
+					blur(function () {
+						var $this = $(this);
+						$this.val($this.val().toUpperCase()).change();
+					}).
 				end().
 				find('input[name=callsign]').
 					blur(function () {
@@ -402,7 +406,8 @@ signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $ti
 			$scope.isNew   = true;
 			$scope.editType = 'New';
 		}
-		$scope.editingReport = signalReportsApp.Utils.setDateAndTime($scope.editing);
+		$scope.editingReport = signalReportsApp.Utils.setDateAndTime(angular.copy($scope.editing));
+		console.log($scope.editingReport);
 	};
 
 	$scope.closeForm = function () {
@@ -427,8 +432,8 @@ signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $ti
 	$scope.submit = function () {
 		var report = $scope.editing;
 		var data = $scope.editingReport;
-		for (var i = 0, it; (it = data[i]); i++) {
-			report[it.name] = it.value;
+		for (var key in data) if (data.hasOwnProperty(key)) {
+			report[key] = data[key];
 		}
 		report.tz = (new Date()).getTimezoneOffset();
 

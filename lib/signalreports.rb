@@ -35,6 +35,15 @@ class SignalReports < Sinatra::Base
 	post "/api/entries" do
 		entry_id = request["id"]
 
+		blank = %w|date time callsign frequency mode ur_rst my_rst|.select {|i|
+			request[i].nil? || request[i].empty?
+		}
+
+		unless blank.empty?
+			content_type :json
+			return { "ok" => false, "error" => blank }.to_json
+		end
+
 		date = /^(?<year>\d{4})-(?<month>\d\d)-(?<day>\d\d)$/.match(request["date"])
 		time = /^(?<hour>\d\d):(?<minute>\d\d)(?::(?<second>\d\d))?$/.match(request["time"])
 		offset = request["tz"].to_i * 60
