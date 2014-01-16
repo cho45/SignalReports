@@ -89,6 +89,13 @@ signalReportsApp.filter('strftime', function () {
 	};
 });
 
+signalReportsApp.filter('frequency', function () {
+	console.log('frequency');
+	return function (frequency) {
+		return String(+frequency * 1e6).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,').replace(/,/, '.').slice(0, -1);
+	};
+});
+
 signalReportsApp.factory('$exceptionHandler', function () {
 	return function (exception, cause) {
 		alert(exception.message);
@@ -377,7 +384,7 @@ signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $ti
 
 	$scope.load = function () {
 		$scope.reports = Reports.query({ query : $scope.query }, function (data) {
-			console.log(data);
+			$scope.total   = Reports.count;
 			$scope.hasMore = Reports.hasMore;
 		});
 	};
@@ -434,6 +441,7 @@ signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $ti
 			$scope.editing = null;
 			if ($scope.isNew) {
 				$scope.reports.unshift(report);
+				$scope.total++;
 			}
 		});
 	};
@@ -454,5 +462,6 @@ signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $ti
 	$scope.hasMore = false;
 	$scope.editing = null;
 	$scope.orderProp = 'id';
+	$scope.total = 0;
 	$scope.load();
 });

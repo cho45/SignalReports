@@ -55,6 +55,8 @@ var SignalReports = function () {
 		if (!data.my_rst) data.my_rst = String_random(/\d{3}/);
 		data.tz = 0;
 
+		console.log(data);
+
 		this.exec(function (data, callback) {
 			angular.injector(['signalReportsApp']).invoke(function (Reports) {
 				var report = new Reports();
@@ -183,7 +185,8 @@ describe("SignalReports", function () {
 		var signalReports = new SignalReports();
 		var dt = 1, reports = [];
 		for (var i = 0; i < 11; i++) {
-			reports.unshift(signalReports.createNewReport({ datetime: dt++ }));
+			dt += 60000;
+			reports.unshift(signalReports.createNewReport({ datetime: dt }));
 		}
 
 		browser.navigate().refresh();

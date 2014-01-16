@@ -42,6 +42,7 @@
 			<div class="collapse navbar-collapse">
 				<ul class="nav navbar-nav">
 					<li><a href="#new" ng-click="openForm()">New report</a></li>
+					<li><a>Total: {{ total }}</a></li>
 				</ul>
 				<form class="navbar-form navbar-right" id="search-form" ng-submit="search(true)">
 					<div class="form-group">
@@ -59,7 +60,7 @@
 						<th>Frequency</th>
 						<th>Mode</th>
 						<th>Date Time</th>
-						<th>RST</th>
+						<th>UR RST</th>
 						<th>MY RST</th>
 						<th>Name</th>
 						<th>QTH</th>
@@ -69,20 +70,20 @@
 				<tbody id="entries">
 					<tr ng-repeat="report in reports | orderBy:orderProp:true" ng-click="openForm(report)" data-id="{{ report.id }}">
 						<td>{{ report.callsign }}</td>
-						<td>{{ report.frequency }}</td>
-						<td>{{ report.mode }}</td>
-						<td><time data-epoch="{{ report.datetime * 1000 }}">{{ report.datetime | strftime:"%Y-%m-%d %H:%M" }}</time></td>
-						<td>{{ report.ur_rst }}</td>
-						<td>{{ report.my_rst }}</td>
-						<td>{{ report.name }}</td>
-						<td>{{ report.address }}</td>
-						<td>{{ report.memo }}</td>
+						<td class="frequency">{{ report.frequency | frequency }}</td>
+						<td class="mode"><span class="label label-{{ report.mode | lowercase }}">{{ report.mode }}</span></td>
+						<td class="datetime"><time data-epoch="{{ report.datetime * 1000 }}">{{ report.datetime | strftime:"%Y-%m-%d %H:%M" }}</time></td>
+						<td class="rst">{{ report.ur_rst }}</td>
+						<td class="rst">{{ report.my_rst }}</td>
+						<td class="name">{{ report.name }}</td>
+						<td class="address">{{ report.address }}</td>
+						<td class="memo">{{ report.memo }}</td>
 					</tr>
 				</tbody>
 			</table>
 
 			<div class="" style="text-align:center; padding: 0 15px">
-				<a href="#" id="more" class="btn btn-default btn-block" ng-click="loadNext()" ng-show="hasMore"><span class="glyphicon glyphicon-chevron-down"></span></a>
+				<a href="javascript:void(0)" id="more" class="btn btn-default btn-block" ng-click="loadNext()" ng-show="hasMore"><span class="glyphicon glyphicon-chevron-down"></span></a>
 			</div>
 
 			<div class="modal" id="input-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true" sr-edit-dialog>

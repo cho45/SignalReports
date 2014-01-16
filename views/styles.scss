@@ -33,6 +33,44 @@ body.modal-open, .modal-open .navbar-fixed-top, .modal-open .navbar-fixed-bottom
 	}
 }
 
+.label-cw {
+	background-color: #5bc0de;
+}
+
+.label-am {
+	background-color: #d9534f;
+}
+
+.label-fm {
+	background-color: #999;
+}
+
+.label-ssb {
+	background-color: #428bca;
+}
+
+.label-rtty {
+	background-color: #f0ad4e;
+}
+
+#entries {
+	.frequency {
+		text-align: right;
+	}
+
+	.mode {
+		text-align: center;
+	}
+
+	.datetime {
+		text-align: center;
+	}
+
+	.rst {
+		text-align: center;
+	}
+}
+
 #input-form {
 	.rst-container .tone {
 		display: none;
