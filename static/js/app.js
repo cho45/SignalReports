@@ -39,39 +39,6 @@ signalReportsApp.Utils = {
 		entry.date = dt.strftime('%Y-%m-%d');
 		entry.time = dt.strftime('%H:%M');
 		return entry;
-	},
-
-	JCC : {
-		resolve : function (number) {
-			var ret = new Deferred();
-			$.ajax({
-				url: "/js/jcc.json",
-				type : "GET",
-				data : {},
-				dataType: 'json'
-			}).
-			done(function (data) {
-				signalReportsApp.Utils.JCC.resolve = function (number) {
-					var ret = new Deferred();
-					setTimeout(function () {
-						try {
-							var index = data.index[number];
-							ret.call(data.list.slice(index[0], index[0] + index[1]));
-						} catch (e) {
-							ret.call([]);
-						}
-					}, 0);
-					return ret;
-				};
-				signalReportsApp.Utils.JCC.resolve(number).next(function (list) {
-					ret.call(list);
-				});
-			}).
-			fail(function (e) {
-				ret.fail(e);
-			});
-			return ret;
-		}
 	}
 };
 

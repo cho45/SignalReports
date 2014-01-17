@@ -35,7 +35,7 @@ signalReportsApp.directive('srTypeaheadMode', function () {
 	};
 });
 
-signalReportsApp.directive('srEditDialog', function () {
+signalReportsApp.directive('srEditDialog', function (JCCService) {
 	return {
 		link : function (scope, inputForm, attrs) {
 			var inputBackupTimer;
@@ -138,7 +138,7 @@ signalReportsApp.directive('srEditDialog', function () {
 						{
 							match : /(^|\s)(jc[cg]\d{2,})$/i,
 							search : function (query, next) {
-								signalReportsApp.Utils.JCC.resolve(query.toUpperCase()).next(next);
+								JCCService.resolve(query.toUpperCase()).then(next);
 							},
 							template : function (value) {
 								return value.number + ' (' + value.name + ')';
