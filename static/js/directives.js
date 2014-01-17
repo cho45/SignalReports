@@ -2,18 +2,33 @@
 signalReportsApp.directive('srTypeaheadCallsign', function () {
 	return {
 		link : function (scope, element, attrs) {
-			element.typeahead({
-				name : 'callsign',
-				template: 'callcompl',
-				engine: {
-					compile : function (string) {
-						return {
-							render : template(string)
-						};
+			element.
+				typeahead({
+					name : 'callsign',
+					template: 'callcompl',
+					engine: {
+						compile : function (string) {
+							return {
+								render : template(string)
+							};
+						}
+					},
+					remote : '/api/callsign?q=%QUERY'
+				}).
+				keydown(function (e) {
+					var key = keyString(e);
+					if (key === 'RET') {
+						element.data('ttView').inputView.trigger('enterKeyed', e);
+					} else
+					if (key === 'C-n') {
+						e.ctrlKey = false;
+						element.data('ttView').inputView.trigger('downKeyed', e);
+					} else
+					if (key === 'C-p') {
+						e.ctrlKey = false;
+						element.data('ttView').inputView.trigger('upKeyed', e);
 					}
-				},
-				remote : '/api/callsign?q=%QUERY'
-			});
+				});
 		}
 	};
 });
@@ -35,7 +50,41 @@ signalReportsApp.directive('srTypeaheadMode', function () {
 	};
 });
 
-signalReportsApp.directive('srEditDialog', function (JCCService) {
+signalReportsApp.directive('srForceUppercase', function () {
+	return {
+		link : function (scope, element, attrs) {
+			element.bind('blur', function () {
+				if (element.val() != element.val().toUpperCase()) {
+					element.val(element.val().toUpperCase()).change();
+				}
+			});
+		}
+	};
+});
+
+signalReportsApp.directive('srCompleteJcc', function (JCCService) {
+	return {
+		link : function (scope, element, attrs) {
+			element.
+				textcomplete([
+					{
+						match : /(^|\s)(jc[cg]\d{2,})$/i,
+						search : function (query, next) {
+							JCCService.resolve(query.toUpperCase()).then(next);
+						},
+						template : function (value) {
+							return value.number + ' (' + value.name + ')';
+						},
+						replace : function (value) {
+							return '$1' + value.number + ' ';
+						}
+					}
+				]);
+		}
+	};
+});
+
+signalReportsApp.directive('srEditDialog', function () {
 	return {
 		link : function (scope, inputForm, attrs) {
 			var inputBackupTimer;
@@ -67,20 +116,10 @@ signalReportsApp.directive('srEditDialog', function (JCCService) {
 						inputForm.addClass('mode-' + this.value);
 					}).
 					change().
-					blur(function () {
-						var $this = $(this);
-						if ($this.val() != $this.val().toUpperCase()) {
-							$this.val($this.val().toUpperCase()).change();
-						}
-					}).
 				end().
 				find('input[name=callsign]').
 					blur(function () {
 						var $this = $(this);
-						if ($this.val() != $this.val().toUpperCase()) {
-							$this.val($this.val().toUpperCase()).change();
-						}
-
 						if ($this.val() && !inputFormForm.find('input[name=time]').val()) {
 							$('#now').click();
 						}
@@ -101,21 +140,6 @@ signalReportsApp.directive('srEditDialog', function (JCCService) {
 						fail(function (e) {
 						});
 					}).
-					keydown(function (e) {
-						var $this = $(this);
-						var key = keyString(e);
-						if (key === 'RET') {
-							$this.data('ttView').inputView.trigger('enterKeyed', e);
-						} else
-						if (key === 'C-n') {
-							e.ctrlKey = false;
-							$this.data('ttView').inputView.trigger('downKeyed', e);
-						} else
-						if (key === 'C-p') {
-							e.ctrlKey = false;
-							$this.data('ttView').inputView.trigger('upKeyed', e);
-						}
-					}).
 				end().
 				find('input[name=ur_rst], input[name=my_rst]').
 					focus(function () {
@@ -132,22 +156,6 @@ signalReportsApp.directive('srEditDialog', function (JCCService) {
 						$this.parent().find('tr.strength td').text( (rst[1] || '') + ' ' + (signalReportsApp.Utils.RST.S[rst[1] - 1] || '') );
 						$this.parent().find('tr.tone td').text( (rst[2] || '') + ' ' + (signalReportsApp.Utils.RST.T[rst[2] - 1] || '') );
 					}).
-				end().
-				find('textarea').
-					textcomplete([
-						{
-							match : /(^|\s)(jc[cg]\d{2,})$/i,
-							search : function (query, next) {
-								JCCService.resolve(query.toUpperCase()).then(next);
-							},
-							template : function (value) {
-								return value.number + ' (' + value.name + ')';
-							},
-							replace : function (value) {
-								return '$1' + value.number + ' ';
-							}
-						}
-					]).
 				end()
 				;
 			

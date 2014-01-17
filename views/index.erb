@@ -124,7 +124,7 @@
 											<span class="input-group-addon">
 												Mode
 											</span>
-											<input type="text" size="5" name="mode" class="form-control input-sm" value="CW" required ng-model="editingReport.mode" sr-typeahead-mode/>
+											<input type="text" size="5" name="mode" class="form-control input-sm" value="CW" required ng-model="editingReport.mode" sr-typeahead-mode sr-force-uppercase/>
 										</div>
 									</div>
 									<div class="col-lg-3">
@@ -153,7 +153,7 @@
 											<span class="input-group-addon">
 												Call sign
 											</span>
-											<input type="text" size="10" name="callsign" class="form-control input-sm" required ng-model="editingReport.callsign" sr-typeahead-callsign/>
+											<input type="text" size="10" name="callsign" class="form-control input-sm" required ng-model="editingReport.callsign" sr-typeahead-callsign sr-force-uppercase/>
 											<script type="application/x-template" id="callcompl">
 												<p style="width: 400px">
 												[% if (this.stash.count) { %]
@@ -245,7 +245,7 @@
 												Memo
 											</span>
 											<div>
-												<textarea name="memo" class="form-control" style="display: block; width: 100%; height: 10em" ng-model="editingReport.memo"></textarea>
+												<textarea name="memo" class="form-control" style="display: block; width: 100%; height: 10em" ng-model="editingReport.memo" sr-complete-jcc></textarea>
 											</div>
 										</div>
 									</div>
