@@ -77,14 +77,6 @@ signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $ti
 			$scope.isNew   = true;
 			$scope.editType = 'New';
 
-			CATSocketService.bind('message', function (e, data) {
-				console.log(data);
-				$scope.editingReport.frequency = data.frequency / 1e6;
-				$scope.editingReport.mode = data.mode;
-			});
-
-			if (CATSocketService.connected)  CATSocketService.triggerHandler('message', CATSocketService.status);
-
 			$scope.backupTimer = $interval(function () {
 				if ($scope.formChanged) {
 					localStorage.inputBackup = angular.toJson($scope.editingReport);
@@ -93,6 +85,16 @@ signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $ti
 			}, 1000);
 		}
 		$scope.editingReport = signalReportsApp.Utils.setDateAndTime(angular.copy($scope.editing));
+
+		if ($scope.isNew) {
+			CATSocketService.bind('message', function (e, data) {
+				console.log(data);
+				$scope.editingReport.frequency = data.frequency / 1e6;
+				$scope.editingReport.mode = data.mode;
+			});
+
+			if (CATSocketService.connected)  CATSocketService.triggerHandler('message', [ CATSocketService.status ]);
+		}
 	};
 
 	$scope.restoreBackup = function () {

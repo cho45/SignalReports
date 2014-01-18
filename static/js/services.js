@@ -23,8 +23,8 @@ signalReportsApp.factory('CATSocketService', function () {
 		};
 
 		service.socket.onmessage = function (e) {
-			service.status = e;
 			var data = JSON.parse(e.data);
+			service.status = data;
 			console.log('ws.onmessage', data);
 			service.triggerHandler('message', [ data ]);
 		};
