@@ -1,5 +1,5 @@
 signalReportsApp.factory('CATSocketService', function () {
-	var service = {};
+	var service = $({});
 
 	service.connect = function () {
 		if (service.socket) return;
@@ -7,10 +7,12 @@ signalReportsApp.factory('CATSocketService', function () {
 
 		service.socket.onopen = function () {
 			console.log('onopen');
+			service.connected = true;
 			if (service.onopen) service.onopen();
 		};
 
 		service.socket.onclose = function () {
+			service.connected = false;
 			console.log('onclose');
 			if (service.onclose) service.onclose();
 			delete service.socket;
@@ -21,9 +23,10 @@ signalReportsApp.factory('CATSocketService', function () {
 		};
 
 		service.socket.onmessage = function (e) {
-			console.log('ws.onmessage', data);
+			service.status = e;
 			var data = JSON.parse(e.data);
-			if (service.onmessage) service.onmessage(data);
+			console.log('ws.onmessage', data);
+			service.triggerHandler('message', [ data ]);
 		};
 	};
 
@@ -34,6 +37,8 @@ signalReportsApp.factory('CATSocketService', function () {
 	service.command = function (cmd, arg) {
 		service.send({ command: cmd, value : arg });
 	};
+
+	service.connect();
 
 	return service;
 });

@@ -1,4 +1,4 @@
-signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $timeout, $interval, $document, Reports) {
+signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $timeout, $interval, $document, Reports, CATSocketService) {
 	$document.bind('keydown', function (e) {
 		var key = keyString(e);
 		if (key === 'C-RET') {
@@ -77,6 +77,14 @@ signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $ti
 			$scope.isNew   = true;
 			$scope.editType = 'New';
 
+			CATSocketService.bind('message', function (e, data) {
+				console.log(data);
+				$scope.editingReport.frequency = data.frequency / 1e6;
+				$scope.editingReport.mode = data.mode;
+			});
+
+			if (CATSocketService.connected)  CATSocketService.triggerHandler('message', CATSocketService.status);
+
 			$scope.backupTimer = $interval(function () {
 				if ($scope.formChanged) {
 					localStorage.inputBackup = angular.toJson($scope.editingReport);
@@ -98,6 +106,7 @@ signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $ti
 		$scope.editing = null;
 		$scope.editingReport = null;
 		$interval.cancel($scope.backupTimer);
+		CATSocketService.unbind('message');
 	};
 
 	$scope.deleteReport = function () {
