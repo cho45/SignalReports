@@ -1,4 +1,4 @@
-signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $timeout, $document, Reports) {
+signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $timeout, $interval, $document, Reports) {
 	$document.bind('keydown', function (e) {
 		var key = keyString(e);
 		if (key === 'C-RET') {
@@ -47,20 +47,57 @@ signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $ti
 
 	$scope.openForm = function (report) {
 		console.log('openForm', $scope.editing);
+		$scope.hasBackup = false;
 		if (report) {
 			$scope.editing = report;
 			$scope.isNew   = false;
 			$scope.editType = 'Edit (id=' + report.id + ')';
 		} else {
-			$scope.editing = new Reports({});
+			if (localStorage.inputBackup) {
+				try {
+					var backup = new Reports(angular.fromJson(localStorage.inputBackup));
+					$scope.hasBackup = backup;
+				} catch (e) {
+					console.log('Failed to parse json');
+				}
+			}
+
+			if (!$scope.editing) {
+				var last = $scope.reports[0];
+				if (last) {
+					console.log('fillin last', last);
+					$scope.editing = new Reports({
+						frequency : last.frequency,
+						mode : last.mode
+					});
+				} else {
+					$scope.editing = new Reports({});
+				}
+			}
 			$scope.isNew   = true;
 			$scope.editType = 'New';
+
+			$scope.backupTimer = $interval(function () {
+				if ($scope.formChanged) {
+					localStorage.inputBackup = angular.toJson($scope.editingReport);
+					console.log(localStorage.inputBackup);
+				}
+			}, 1000);
 		}
 		$scope.editingReport = signalReportsApp.Utils.setDateAndTime(angular.copy($scope.editing));
 	};
 
+	$scope.restoreBackup = function () {
+		console.log('restoreBackup');
+		$scope.editingReport = $scope.hasBackup;
+		$scope.hasBackup = null;
+	};
+
 	$scope.closeForm = function () {
+		console.log('closeForm');
 		$scope.editing = null;
+		$scope.editingReport = null;
+		$interval.cancel($scope.backupTimer);
 	};
 
 	$scope.deleteReport = function () {

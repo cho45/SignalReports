@@ -160,49 +160,21 @@ signalReportsApp.directive('srEditDialog', function () {
 				;
 			
 			scope.$watch('editing', function (report) {
-				console.log('editing');
 				if (report) {
 					scope.formChanged = false;
 					inputForm.on('hide.bs.modal', function () {
 						inputForm.unbind('hide.bs.modal');
-						clearInterval(inputBackupTimer);
 						if (scope.formChanged) {
 							if (confirm('Sure?')) {
-								scope.editing = null;
+								scope.closeForm();
 								return true;
 							} else {
 								return false;
 							}
 						} else {
-							scope.editing = null;
+							scope.closeForm();
 						}
 					});
-
-					if (scope.isNew) {
-						var last = scope.reports[0];
-						if (last) {
-							// fill in partial data
-							scope.editingReport.frequency = last.frequency;
-							scope.editingReport.mode = last.mode;
-						}
-
-						if (localStorage.inputBackup) {
-							console.log('Restore from backup');
-							inputFormForm.deserialize(localStorage.inputBackup);
-							$('input, textarea').change();
-						}
-
-						inputBackupTimer = setInterval(function () {
-							if (scope.formChanged) {
-								localStorage.inputBackup = inputFormForm.serialize();
-								console.log('backup saved');
-							}
-						}, 1000);
-					} else {
-						var data = angular.copy(report);
-						signalReportsApp.Utils.setDateAndTime(data);
-						inputFormForm.deserialize(data);
-					}
 
 					inputForm.modal({
 						keyboard: false

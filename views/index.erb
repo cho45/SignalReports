@@ -102,7 +102,12 @@
 							<div class="modal-header">
 								<button type="button" class="close" ng-click="closeForm()" aria-hidden="true">&times;</button>
 								<h4 class="modal-title">
-									<span class="glyphicon glyphicon-headphones"></span> Signal Report: <span class="edit-type" ng-bind="editType">{{}}</span>
+									<span class="glyphicon glyphicon-headphones"></span>
+									Signal Report:
+									<span class="edit-type" ng-bind="editType">{{}}</span>
+									<small>
+										<span class="backup" ng-show="hasBackup">Backup exists ({{ hasBackup.date }}):<a href="javascript:void(0)" ng-click="restoreBackup()">Restore</a></span>
+									</small>
 									<input type="button" class="btn btn-danger btn-xs" id="delete" value="Delete" ng-click="deleteReport()" ng-hide="isNew"/>
 								</h4>
 							</div>

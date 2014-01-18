@@ -34,10 +34,11 @@ signalReportsApp.Utils = {
 	},
 
 	setDateAndTime : function (entry) {
-		var dt = new Date(entry.datetime * 1000);
-
-		entry.date = dt.strftime('%Y-%m-%d');
-		entry.time = dt.strftime('%H:%M');
+		if (!entry.date || !entry.time) {
+			var dt = new Date(entry.datetime * 1000);
+			entry.date = dt.strftime('%Y-%m-%d');
+			entry.time = dt.strftime('%H:%M');
+		}
 		return entry;
 	}
 };
@@ -51,11 +52,11 @@ signalReportsApp.Utils = {
 //	 };
 //});
 
-signalReportsApp.factory('$exceptionHandler', function () {
-	return function (exception, cause) {
-		alert(exception.message);
-	};
-});
+//signalReportsApp.factory('$exceptionHandler', function () {
+//	return function (exception, cause) {
+//		alert(exception.message);
+//	};
+//});
 
 
 
