@@ -3,7 +3,7 @@ signalReportsApp.factory('CATSocketService', function () {
 
 	service.connect = function () {
 		if (service.socket) return;
-		service.socket = new WebSocket("ws://raspberrypi.local:51234");
+		service.socket = new WebSocket("ws://waatserver.local:51234");
 
 		service.socket.onopen = function () {
 			console.log('onopen');
@@ -23,7 +23,7 @@ signalReportsApp.factory('CATSocketService', function () {
 		};
 
 		service.socket.onmessage = function (e) {
-			var data = JSON.parse(e.data);
+			var data = JSON.parse(e.data).result;
 			service.status = data;
 			console.log('ws.onmessage', data);
 			service.triggerHandler('message', [ data ]);

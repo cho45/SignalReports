@@ -88,7 +88,7 @@ signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $ti
 
 		if ($scope.isNew) {
 			CATSocketService.bind('message', function (e, data) {
-				console.log(data);
+				console.log(['isNew', data]);
 				$scope.editingReport.frequency = data.frequency / 1e6;
 				$scope.editingReport.mode = data.mode;
 			});
