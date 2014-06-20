@@ -1,0 +1,4 @@
+#!/bin/sh
+
+RACK_ENV=production foreman start
+
