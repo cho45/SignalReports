@@ -1,4 +1,5 @@
 #!/bin/sh
 
+bundle install
 RACK_ENV=production foreman start
 

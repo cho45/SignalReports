@@ -1,6 +1,7 @@
 source "https://rubygems.org"
 
 gem "sinatra"
+gem "foreman"
 gem "sass"
 gem "json"
 gem "sqlite3"
