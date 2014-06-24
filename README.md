@@ -33,3 +33,15 @@ Export
 todo
 
 
+Develop
+=======
+
+
+## Migration
+
+By default, migrations are run automatically.
+But if you want to migrate explicitly, run as following:
+
+```
+bundle exec sequel -E -m migrations/ -M $version sqlite://debug.db
+```
