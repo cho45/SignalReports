@@ -132,7 +132,7 @@ signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $ti
 		var report = $scope.editing;
 		var data = $scope.editingReport;
 		for (var key in data) if (data.hasOwnProperty(key)) {
-			report[key] = data[key];
+			report[key] = data[key] || '';
 		}
 		report.tz = (new Date()).getTimezoneOffset();
 
