@@ -91,6 +91,7 @@ signalReportsApp.controller('SignalReportListCtrl', function ($scope, $http, $ti
 				console.log(['isNew', data]);
 				$scope.editingReport.frequency = data.frequency / 1e6;
 				$scope.editingReport.mode = data.mode;
+				$scope.editingReport.tx_power = data.power;
 			});
 
 			if (CATSocketService.connected)  CATSocketService.triggerHandler('message', [ CATSocketService.status ]);
