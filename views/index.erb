@@ -74,6 +74,10 @@
 						<th>Name</th>
 						<th>QTH</th>
 						<th>Memo</th>
+						<th class="location">Location</th>
+						<th class="rig">Rig</th>
+						<th class="antenna">Ant</th>
+						<th class="tx_power">TX Power</th>
 					</tr>
 				</thead>
 				<tbody id="entries">
@@ -87,6 +91,10 @@
 						<td class="name">{{ report.name }}</td>
 						<td class="address">{{ report.address }}</td>
 						<td class="memo">{{ report.memo }}</td>
+						<td class="location">{{ report.location }}</td>
+						<td class="rig">{{ report.rig }}</td>
+						<td class="antenna">{{ report.antenna }}</td>
+						<td class="tx_power">{{ report.tx_power }}</td>
 					</tr>
 				</tbody>
 			</table>
@@ -113,7 +121,7 @@
 							</div>
 							<div class="modal-body">
 								<div class="row">
-									<div class="col-lg-3">
+									<div class="col-lg-4">
 										<div class="input-group input-group-sm">
 											<span class="input-group-addon">
 												Freq.
@@ -224,6 +232,22 @@
 											</span>
 										</div>
 									</div>
+									<div class="col-lg-3">
+										<div class="input-group input-group-sm">
+											<span class="input-group-addon">
+												ANT
+											</span>
+											<input type="text" size="3" name="antenna" class="form-control input-sm" value="" ng-model="editingReport.antenna"/>
+										</div>
+									</div>
+									<div class="col-lg-2">
+										<div class="input-group input-group-sm">
+											<span class="input-group-addon">
+												Power
+											</span>
+											<input type="text" size="3" name="tx_power" class="form-control input-sm" value="" ng-model="editingReport.tx_power"/>
+										</div>
+									</div>
 								</div>
 								<div class="row">
 									<div class="col-lg-4">
@@ -251,6 +275,28 @@
 											</span>
 											<div>
 												<textarea name="memo" class="form-control" style="display: block; width: 100%; height: 10em" ng-model="editingReport.memo" sr-complete-jcc></textarea>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-lg-8">
+										<div class="input-group input-group-sm">
+											<span class="input-group-addon">
+												My Location
+											</span>
+											<div>
+												<input type="text" size="10" name="location" class="form-control input-sm" ng-model="editingReport.location"/>
+											</div>
+										</div>
+									</div>
+									<div class="col-lg-4">
+										<div class="input-group input-group-sm">
+											<span class="input-group-addon">
+												Rig
+											</span>
+											<div>
+												<input type="text" size="10" name="rig" class="form-control input-sm" ng-model="editingReport.rig"/>
 											</div>
 										</div>
 									</div>

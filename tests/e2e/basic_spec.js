@@ -16,7 +16,11 @@ var SignalReports = function () {
 		my_rst    : element(by.model('editingReport.my_rst')),
 		name      : element(by.model('editingReport.name')),
 		address   : element(by.model('editingReport.address')),
-		memo      : element(by.model('editingReport.memo'))
+		memo      : element(by.model('editingReport.memo')),
+		location  : element(by.model('editingReport.location')),
+		rig       : element(by.model('editingReport.rig')),
+		antenna   : element(by.model('editingReport.antenna')),
+		tx_power  : element(by.model('editingReport.tx_power'))
 	};
 
 	this.openForm = function () {
@@ -100,6 +104,10 @@ describe("SignalReports", function () {
 		signalReports.inputs.my_rst.sendKeys('589');
 		signalReports.inputs.memo.sendKeys('TEST MEMO');
 		signalReports.inputs.name.sendKeys('HIRO');
+		signalReports.inputs.antenna.sendKeys('MicroVert');
+		signalReports.inputs.tx_power.sendKeys('50');
+		signalReports.inputs.location.sendKeys('Kanagawa, Japan');
+		signalReports.inputs.rig.sendKeys('FT-450D');
 
 		signalReports.submitForm();
 
@@ -113,6 +121,11 @@ describe("SignalReports", function () {
 		expect(element(row.column('address')).getText()).toEqual('Japan');
 		expect(element(row.column('memo')).getText()).toEqual('TEST MEMO');
 		expect(element(row.column('name')).getText()).toEqual('HIRO');
+
+		expect(element(row.column('antenna')).getText()).toEqual('MicroVert');
+		expect(element(row.column('tx_power')).getText()).toEqual('50');
+		expect(element(row.column('location')).getText()).toEqual('Kanagawa, Japan');
+		expect(element(row.column('rig')).getText()).toEqual('FT-450D');
 
 		expect(element.all(by.repeater('report in reports')).count()).toBe(1);
 	});

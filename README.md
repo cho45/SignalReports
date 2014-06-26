@@ -33,9 +33,16 @@ Export
 todo
 
 
-Develop
-=======
+Development
+===========
 
+## Development Server
+
+Use foreman directly:
+
+```
+PORT=5000 foreman start
+```
 
 ## Migration
 

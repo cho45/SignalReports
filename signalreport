@@ -1,5 +1,6 @@
 #!/bin/sh
 
+export PORT=9876
 bundle install
 RACK_ENV=production foreman start
 

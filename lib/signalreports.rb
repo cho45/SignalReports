@@ -59,6 +59,11 @@ class SignalReports < Sinatra::Base
 			:name      => request["name"],
 			:address   => request["address"],
 			:memo      => request["memo"],
+			:age       => request["age"],
+			:antenna   => request["antenna"],
+			:rig       => request["rig"],
+			:tx_power  => request["tx_power"],
+			:location  => request["location"],
 		}
 
 		entry = nil

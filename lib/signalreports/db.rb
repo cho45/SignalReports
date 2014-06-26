@@ -10,18 +10,7 @@ class SignalReports
 		plugin :force_encoding, 'UTF-8'
 
 		def to_stash
-			{
-				"id"        => self.id,
-				"callsign"  => self.callsign,
-				"frequency" => self.frequency,
-				"mode"      => self.mode,
-				"datetime"  => self.datetime,
-				"ur_rst"    => self.ur_rst,
-				"my_rst"    => self.my_rst,
-				"name"      => self.name,
-				"address"   => self.address,
-				"memo"      => self.memo,
-			}
+			self.to_hash
 		end
 	end
 end
